@@ -1,0 +1,1 @@
+export const JWT_SCERT=process.env.JWT_SCERT || "12345654";

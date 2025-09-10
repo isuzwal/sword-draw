@@ -2,26 +2,23 @@
   "name": "web-backend",
   "version": "1.0.0",
   "description": "",
-  "main": "index.js",
+  "main": "dist/index.js",
+  "type": "commonjs",
   "scripts": {
-    "build": "tsc -b ",
+    "build": "tsc -b",
     "start": "node ./dist/index.js",
     "dev": "npm run build && npm run start",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "dependencies": {
-    "@repo/typescript-config": "workspace:*",
+    "jsonwebtoken": "^9.0.2",
+    "ws": "^8.18.3",
+    "@repo/backend-common": "workspace:*"
+  },
+  "devDependencies": {
     "@types/jsonwebtoken": "^9.0.10",
     "@types/ws": "^8.18.1",
-    "ws": "^8.18.3"
-  },
-    "devDependencies": {
-   "@repo/typescript-config": "workspace:*",
     "@types/express": "^5.0.3",
-    "@repo/backend-common":"workspace:*"
-  },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
-  "type": "commonjs"
+    "@repo/typescript-config": "workspace:*"
+  }
 }

@@ -125,3 +125,24 @@ export const RoomSpace = async (req: Request, res: Response) => {
     });
   }
 };
+// get the chat form db 
+export const RoomChat=async(req:Request,res:Response)=>{
+    try{
+      
+      // chefk in the db of the chat
+      const chata= await prismaClient.chat.findMany();
+        return res.status(200).json({
+          status:true,
+        data:{
+          chata
+        }
+        })
+ }catch(error){
+ console.log(" Erorr -->", error);
+    return res.status(500).json({
+      status: false,
+      message: " Internal server problem !",
+    });
+ }
+
+}

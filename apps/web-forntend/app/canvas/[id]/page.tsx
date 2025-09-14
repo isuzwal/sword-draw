@@ -1,23 +1,15 @@
- "use client"
- import { DrawInit } from "@/app/draw"
-import { useEffect, useRef } from "react"
 
-export default function Page(){
+//server  component
+ import CanvaPage from "@/app/components/room-view";
+
+export default  async function Page({params}:{
+     params:Promise<{
+        id:string
+     }>
+}){
     
- const canvasRef=useRef<HTMLCanvasElement >(null);
- useEffect(()=>{
-   if(canvasRef.current){
-       DrawInit(canvasRef.current)
-   }
- },[])
-    return(
-        <div>
-            Draw-canvas
-            <canvas  ref={canvasRef} width={1000} height={1000
+  const {id}= await params
+  console.log("RoomId ---->",id);
+  return <CanvaPage roomId={id} />
 
-            } className="">
-
-            </canvas>
-        </div>
-    )
 }

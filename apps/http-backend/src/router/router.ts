@@ -1,4 +1,4 @@
-import { Request, Response } from "express";
+import { json, Request, Response } from "express";
 import jwt from "jsonwebtoken";
 import { JWT_SCERT } from "@repo/backend-common/config";
 import { SignupScheam, LoginScheam, CreateRoomSchema } from "@repo/common/types";
@@ -28,19 +28,19 @@ export const Singup = async (req: Request, res: Response) => {
 
     // hasing the password
     const hashpassword = await hash(password, 10);
-    const useraccount = await  prismaClient.user.create({
+    const useraccount = await prismaClient.user.create({
       data: {
-        name:username,
+        name: username,
         email,
         password: hashpassword,
       },
     });
-    // 
+    //
     res.status(200).json({
-        status:true,
-        message:"Account create successfully",
-        data:useraccount
-    })
+      status: true,
+      message: "Account create successfully",
+      data: useraccount,
+    });
   } catch (error) {
     console.log("Erorr -->", error);
     res.status(500).json({
@@ -51,7 +51,7 @@ export const Singup = async (req: Request, res: Response) => {
 };
 // Login
 export const Login = async (req: Request, res: Response) => {
-  const parsed= LoginScheam.safeParse(req.body);
+  const parsed = LoginScheam.safeParse(req.body);
   if (!parsed.success) {
     return res.status(400).json({
       status: false,
@@ -59,26 +59,26 @@ export const Login = async (req: Request, res: Response) => {
     });
   }
   try {
-    const {email,password} = parsed.data;
+    const { email, password } = parsed.data;
     // check in db it alredy presnt .
-   const IsExistinguser = await prismaClient.user.findUnique({
+    const IsExistinguser = await prismaClient.user.findUnique({
       where: { email },
     });
-    if(!IsExistinguser)
+    if (!IsExistinguser)
       return res.status(404).json({
-    status: false,
-    message: "User not found",
-   })
-   if(!IsExistinguser){
-    return res.status(404).json({
-      status:false,
-      message:"User not exits !"
-    })
-   }
+        status: false,
+        message: "User not found",
+      });
+    if (!IsExistinguser) {
+      return res.status(404).json({
+        status: false,
+        message: "User not exits !",
+      });
+    }
 
     const token = jwt.sign(
       {
-      userId:IsExistinguser.id,
+        userId: IsExistinguser.id,
       },
       JWT_SCERT
     );
@@ -105,18 +105,18 @@ export const RoomSpace = async (req: Request, res: Response) => {
       });
     }
     // @ts-ignore
-    const userId=req.userId
-    const room= await prismaClient.room.create({
-      data:{
-        slug:prased.data.name,
-        adminId:userId
-      }
-    })
+    const userId = req.userId;
+    const room = await prismaClient.room.create({
+      data: {
+        slug: prased.data.name,
+        adminId: userId,
+      },
+    });
     return res.status(200).json({
-       status:true,
-       message:"Room created successfully ",
-       room:room.id
-    })
+      status: true,
+      message: "Room created successfully ",
+      room: room.id,
+    });
   } catch (error) {
     console.log(" Erorr -->", error);
     return res.status(500).json({
@@ -125,24 +125,59 @@ export const RoomSpace = async (req: Request, res: Response) => {
     });
   }
 };
-// get the chat form db 
-export const RoomChat=async(req:Request,res:Response)=>{
-    try{
-      
-      // chefk in the db of the chat
-      const chata= await prismaClient.chat.findMany();
-        return res.status(200).json({
-          status:true,
-        data:{
-          chata
-        }
-        })
- }catch(error){
- console.log(" Erorr -->", error);
+export const RoomSlug=async(req:Request,res:Response)=>{
+  const slug=req.body.slug;
+  console.log(slug);
+  try{
+    if(!slug){
+      return res.status(400).json({
+        status:false,
+        message:"missing the Slug !"
+      })
+    }
+    const room=await prismaClient.room.findFirst({
+      where:{
+        slug
+      }
+    })
+    return res.status(200).json({
+      status:true,
+      room
+  })
+  }catch (error) {
+    console.log(" Erorr -->", error);
     return res.status(500).json({
       status: false,
       message: " Internal server problem !",
     });
- }
-
+  }
 }
+// get the chat form db
+export const RoomChat = async (req: Request, res: Response) => {
+  try {
+    const roomId = req.body;
+    console.log(roomId);
+    // chefk in the db of the chat
+    const chata = await prismaClient.chat.findMany({
+      where: {
+        roomId: Number(roomId),
+      },
+      orderBy: {
+        id: "desc",
+      },
+      take: 30,
+    });
+    return res.status(200).json({
+      status: true,
+      data: {
+        chata,
+      },
+    });
+  } catch (error) {
+    console.log(" Erorr -->", error);
+    return res.status(500).json({
+      status: false,
+      message: " Internal server problem !",
+    });
+  }
+};

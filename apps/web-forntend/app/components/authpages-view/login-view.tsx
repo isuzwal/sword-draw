@@ -44,7 +44,7 @@ export function LoginPage() {
         password: values.password,
       });
       const token=res.data.token;
-       localStorage.setItem("toekn",token);
+       localStorage.setItem("token",token);
       if (res.status === 200 || res.status === 201) {
         router.push("/");
       }

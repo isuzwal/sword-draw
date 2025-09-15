@@ -10,9 +10,8 @@ export default function CanvaPage({ roomId }: { roomId: string }) {
   const [socket, setWebSocket] = useState<WebSocket | null>(null);
 
   useEffect(() => {
-    // estabiled the socket connection form the  fornt-end to web-socket backend
-    // have to send the token to estabile the connection with the web-socket
-    const token=localStorage.getItem("token"); 
+    // sending the token as the parms 
+    const token=localStorage.getItem("token");
     const ws = new WebSocket(`${WS_URL}?token=${token}`);
     ws.onopen = () => {
       setWebSocket(ws);
@@ -21,7 +20,14 @@ export default function CanvaPage({ roomId }: { roomId: string }) {
         roomId
       }))
     };
-  });
+      ws.onerror = (err) => {
+        console.error("WS error:", err)
+        return err
+      }
+     return () => {
+    ws.close();
+  }; 
+  },[roomId]);
   if (!socket) {
     return <div>Connecting to web-scoket....</div>;
   }

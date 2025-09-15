@@ -9,7 +9,6 @@ export default  async function Page({params}:{
 }){
     
   const {id}= await params
-  console.log("RoomId ---->",id);
   return <CanvaPage roomId={id} />
 
 }

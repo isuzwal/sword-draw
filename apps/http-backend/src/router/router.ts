@@ -3,7 +3,8 @@ import jwt from "jsonwebtoken";
 import { JWT_SCERT } from "@repo/backend-common/config";
 import { SignupScheam, LoginScheam, CreateRoomSchema } from "@repo/common/types";
 import { prismaClient } from "@repo/db/clinet";
-import { hash } from "bcrypt-ts";
+import { hash, compare } from "bcrypt-ts";
+
 export const Singup = async (req: Request, res: Response) => {
   const parsed = SignupScheam.safeParse(req.body);
   if (!parsed.success) {
@@ -61,24 +62,25 @@ export const Login = async (req: Request, res: Response) => {
   try {
     const { email, password } = parsed.data;
     // check in db it alredy presnt .
-    const IsExistinguser = await prismaClient.user.findUnique({
+    const is_Existinguser = await prismaClient.user.findUnique({
       where: { email },
     });
-    if (!IsExistinguser)
+    if (!is_Existinguser)
       return res.status(404).json({
         status: false,
         message: "User not found",
       });
-    if (!IsExistinguser) {
-      return res.status(404).json({
-        status: false,
-        message: "User not exits !",
-      });
+    // pasword compare
+    const is_paswordMatch = await compare(password, is_Existinguser.password);
+    if (!is_paswordMatch) {
+      throw new Error("Invalid credentials");
     }
-
+    if (!JWT_SCERT) {
+      return;
+    }
     const token = jwt.sign(
       {
-        userId: IsExistinguser.id,
+        userId: is_Existinguser.id,
       },
       JWT_SCERT
     );
@@ -87,7 +89,6 @@ export const Login = async (req: Request, res: Response) => {
       token: token,
     });
   } catch (error) {
-    console.log(" Erorr -->", error);
     return res.status(500).json({
       status: false,
       message: " Internal server problem !",
@@ -95,6 +96,8 @@ export const Login = async (req: Request, res: Response) => {
   }
 };
 // middleware
+// this is for the user to create by the button in fe send
+// the  send me the room-name
 export const RoomSpace = async (req: Request, res: Response) => {
   const prased = CreateRoomSchema.safeParse(req.body);
   try {
@@ -112,6 +115,7 @@ export const RoomSpace = async (req: Request, res: Response) => {
         adminId: userId,
       },
     });
+    // afrer room create provide the roomId
     return res.status(200).json({
       status: true,
       message: "Room created successfully ",
@@ -125,40 +129,41 @@ export const RoomSpace = async (req: Request, res: Response) => {
     });
   }
 };
-export const RoomSlug=async(req:Request,res:Response)=>{
-  const slug=req.body.slug;
+// no-idea whatv it do ?
+export const RoomSlug = async (req: Request, res: Response) => {
+  const slug = req.body.slug;
   console.log(slug);
-  try{
-    if(!slug){
+  try {
+    if (!slug) {
       return res.status(400).json({
-        status:false,
-        message:"missing the Slug !"
-      })
+        status: false,
+        message: "missing the Slug !",
+      });
     }
-    const room=await prismaClient.room.findFirst({
-      where:{
-        slug
-      }
-    })
+    const room = await prismaClient.room.findFirst({
+      where: {
+        slug,
+      },
+    });
     return res.status(200).json({
-      status:true,
-      room
-  })
-  }catch (error) {
+      status: true,
+      room,
+    });
+  } catch (error) {
     console.log(" Erorr -->", error);
     return res.status(500).json({
       status: false,
       message: " Internal server problem !",
     });
   }
-}
+};
 // get the chat form db
 export const RoomChat = async (req: Request, res: Response) => {
   try {
-    const roomId = req.body;
-    console.log(roomId);
-    // chefk in the db of the chat
-    const chata = await prismaClient.chat.findMany({
+    const { roomId } = req.params;
+
+    // check in the db of the chat
+    const chat = await prismaClient.chat.findMany({
       where: {
         roomId: Number(roomId),
       },
@@ -167,12 +172,18 @@ export const RoomChat = async (req: Request, res: Response) => {
       },
       take: 30,
     });
-    return res.status(200).json({
-      status: true,
-      data: {
-        chata,
-      },
-    });
+    if (chat.length > 0) {
+      return res.status(200).json({
+        status: true,
+        data: { chat },
+      });
+    } else {
+      return res.status(200).json({
+        status: true,
+        message: "No-chat yet !",
+        data: { chat: [] },
+      });
+    }
   } catch (error) {
     console.log(" Erorr -->", error);
     return res.status(500).json({

@@ -12,6 +12,7 @@ type Shape={
      centerY:number,
      radius:number,
 }
+
 // take the argument 
 export  async function DrawInit(canvas:HTMLCanvasElement,roomId:string,socket:WebSocket){
   try{
@@ -62,9 +63,10 @@ export  async function DrawInit(canvas:HTMLCanvasElement,roomId:string,socket:We
       // sending the socket backend 
       exitingShape.push(shape)
       socket.send(JSON.stringify({
+        roomId,
         type:"chat",
         message:JSON.stringify({
-          shape
+          shape,
         })
       }))
     })
@@ -87,9 +89,10 @@ export  async function DrawInit(canvas:HTMLCanvasElement,roomId:string,socket:We
 }
 
 function clearCnavas(exitingShape:Shape[], canvas:HTMLCanvasElement,ctx:CanvasRenderingContext2D){
-    // claer the canvas
+    ctx.fillStyle = "black";  
+  // claer the canvas
     ctx.clearRect(0,0,canvas.width,canvas.height);
-  ctx.fillStyle="rgba(18,18,18,18)";
+  // ctx.fillStyle="rgba(18,18,18,18)";
 
   exitingShape.map((shape)=>{
     if(shape.type=="rectangle"){
@@ -98,16 +101,27 @@ function clearCnavas(exitingShape:Shape[], canvas:HTMLCanvasElement,ctx:CanvasRe
     }
   })
 }
-
+ //  hiting the roomId backend
  async function FetchingAllShape(roomId:string) {
-   const res=await axios.get(`${HTTP_BACKNED}/chat/${roomId}`);
-   const data=res.data.chata;
+  const token = localStorage.getItem("token");
+  try{
 
-    // need to define the type of the message 
-    // object of the message 
+    const res=await axios.get(`${HTTP_BACKNED}/chat/${roomId}`,{
+      headers:{
+        Authorization:`Bearer ${token}`
+      }
+    });
+
+    const data = res?.data?.data?.chat ?? [];
+
     const shapes=data.map((data:{message:string})=>{
-     const messageshapes=JSON.parse(data.message)
-       return messageshapes;
- })
- return shapes;
+      const messageshapes=JSON.parse(data.message)
+      return messageshapes.shape;
+    })
+   
+    return shapes;
+  }catch(err){
+    console.log("At the Fetching all shape-->",err)
+    return []
+  }
  }

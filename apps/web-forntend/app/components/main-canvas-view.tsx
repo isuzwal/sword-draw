@@ -12,7 +12,7 @@ export function MainCanvasPage({ roomId ,socket}: { roomId: string,socket:WebSoc
   return (
     <div>
       Draw-canvas
-      <canvas ref={canvasRef} width={1000} height={1000} className="" />
+      <canvas ref={canvasRef} width={1000} height={1000} className="bg-black" ></canvas>
     </div>
   );
 }

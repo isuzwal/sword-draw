@@ -1,6 +1,6 @@
 
 //server  component
- import CanvaPage from "@/app/components/room-view";
+ import CanvaPage from "@/app/auth-comp/room-view";
 
 export default  async function Page({params}:{
      params:Promise<{

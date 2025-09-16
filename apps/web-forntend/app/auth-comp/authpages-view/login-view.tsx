@@ -1,15 +1,14 @@
 "use client";
 
 import { useState } from "react";
-import {  z } from "zod";
+import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import Link from "next/link";
 import { ArrowLeft, LoaderCircle } from "lucide-react";
-
-import { useRouter } from "next/navigation";
-import { Button } from "@repo/ui/components/ui/button";
-import { Input } from "@repo/ui/components/ui/input";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { toast } from "sonner";
 
 import {
   Form,
@@ -18,43 +17,47 @@ import {
   FormField,
   FormItem,
   FormMessage,
-} from "@repo/ui/components/ui/form";
-import axios from "axios";
-import { HTTP_BACKNED } from "@/app/config";
+} from "@/components/ui/form";
 
-const SigupFormSchema = z.object({
-  username: z.string().min(3, { message: "Username must be at least 3 letter" }),
+import { HTTP_BACKNED } from "@/app/config";
+import axios from "axios";
+import { useRouter } from "next/navigation";
+
+const LoginFormSchema = z.object({
   email: z.string().email({ message: "Enter a valid email address" }),
   password: z.string().min(6, { message: "Password must be at least 6 characters" }),
 });
 
-export function SignupPage() {
+export function LoginPage() {
   const [loading, setLoading] = useState(false);
-    const router = useRouter();
-  // Initaliz stage of the Form
-  const form = useForm<z.infer<typeof SigupFormSchema>>({
-    resolver: zodResolver(SigupFormSchema),
+  const router = useRouter();
+  const form = useForm<z.infer<typeof LoginFormSchema>>({
+    resolver: zodResolver(LoginFormSchema),
     defaultValues: {
-      username: "",
       email: "",
       password: "",
     },
   });
 
-  async function handleLogin(values: z.infer<typeof SigupFormSchema>) {
+  async function handleLogin(values: z.infer<typeof LoginFormSchema>) {
     setLoading(true);
     try {
-        const res= await axios.post(`${HTTP_BACKNED}/signup`,{
-            username:values.username,
-            email:values.email,
-            password:values.password
-        }); 
-   if(res.status===200 || res.status===201){
- router.push("/login")
-   }
-      console.log("Form submitted:", values);
-    } catch (err) {
-      console.error("Login failed", err);
+      const res = await axios.post(`${HTTP_BACKNED}/login`, {
+        email: values.email,
+        password: values.password,
+      });
+      const token = res.data.token;
+      localStorage.setItem("token", token);
+      if (res.status === 200 || res.status === 201) {
+        toast.success(res.data.message || "Login successfully");
+        router.push("/");
+      }
+    } catch (err: any) {
+      if (err.response) {
+        toast.error(err.response.data.error || "Something went  wrong ");
+      } else {
+        toast.error("Networking error");
+      }
     } finally {
       setLoading(false);
     }
@@ -71,31 +74,11 @@ export function SignupPage() {
         <div>
           <div className="p-6 rounded-2xl border border-neutral-200 shadow">
             <Form {...form}>
-              <form onSubmit={form.handleSubmit(handleLogin)} className="space-y-4">
-                <div className="text-center flex  flex-col items-center">
-                  <h1 className="text-2xl font-bold">Create your account</h1>
-                  <p className="text-gray-600 text-sm ">
-                    Quick, simple, and secure —your space to start building.
-                  </p>
+              <form onSubmit={form.handleSubmit(handleLogin)} className="space-y-6">
+                <div className="text-center">
+                  <h1 className="text-2xl font-bold">Welcome Back</h1>
                 </div>
-                <FormField
-                  control={form.control}
-                  name="username"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel className="font-medium text-md p-1">Username</FormLabel>
-                      <FormControl>
-                        <Input
-                          type="text"
-                          placeholder="Jon"
-                          {...field}
-                          className="p-1.5 placeholder:text-neutral-500"
-                        />
-                      </FormControl>
-                      <FormMessage className="text-red-600" />
-                    </FormItem>
-                  )}
-                />
+
                 <FormField
                   control={form.control}
                   name="email"
@@ -137,23 +120,23 @@ export function SignupPage() {
                 <Button
                   type="submit"
                   disabled={loading}
-                  className="w-full bg-black rounded-md p-2 cursor-pointer font-medium text-sm text-white ">
+                  className=" w-full  rounded-md cursor-pointer text-sm text-white ">
                   {loading ? (
-                    <div className="flex  justify-center gap-2 items-center w-full ">
-                      <span className="text-sm">Creating your account </span>
+                    <div className="flex w-full justify-center items-center gap-2 ">
+                      <span>Creating your space</span>{" "}
                       <LoaderCircle className="animate-spin size-4" />
                     </div>
                   ) : (
-                    "Create account"
+                    "Login"
                   )}
                 </Button>
               </form>
             </Form>
 
             <p className="mt-6 text-center text-sm">
-              Already have an account?{" "}
-              <Link href="/login" className="font-semibold underline underline-offset-4">
-                Login
+              Didn’t have an account?{" "}
+              <Link href="/signup" className="font-semibold underline underline-offset-4">
+                Sign up
               </Link>
             </p>
           </div>

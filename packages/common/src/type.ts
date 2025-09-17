@@ -10,5 +10,5 @@ export const LoginScheam=z.object({
     email:z.string().email()
 })
 export const CreateRoomSchema=z.object({
-   name:z.string().min(6).max(16)
+   name:z.string().min(2).max(16)
 })

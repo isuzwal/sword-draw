@@ -9,7 +9,7 @@ import { JWT_SCERT } from '@repo/backend-common/config'
 // }
 export function middlware(req:Request,res:Response,next:NextFunction){
     const token=req.headers.authorization?.split(" ")[1];
-    console.log("From the BE token middilware",token)
+    console.log(token)
    if (!token) return res.status(401).json({ error: "No token provided" });
     if( !JWT_SCERT){
         return ;

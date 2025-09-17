@@ -30,11 +30,11 @@ export function Navbarpage() {
         <div className="hidden     mr-10  sm:flex items-center gap-3">
           {token ? (
             <div className="flex items-center justify-center gap-2">
-              <Button onClick={() => setShow(true)} className="w-full">
+              <Button onClick={() => setShow(true)} className="w-full cursor-pointer">
                 Create space
               </Button>
-              <Link href={"/profile"} className="border border-slate-100 cursor-pointer rounded-md">
-                <Button variant={"secondary"}>Profile</Button>
+              <Link href={"/profile"} className="border border-slate-100  rounded-md">
+                <Button variant={"secondary"}  className="cursor-pointer">Profile</Button>
               </Link>
             </div>
           ) : (

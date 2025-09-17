@@ -100,6 +100,7 @@ export const Login = async (req: Request, res: Response) => {
 // the  send me the room-name
 export const RoomSpace = async (req: Request, res: Response) => {
   const prased = CreateRoomSchema.safeParse(req.body);
+  console.log(prased)
   try {
     if (!prased.success) {
       return res.status(400).json({
@@ -192,3 +193,35 @@ export const RoomChat = async (req: Request, res: Response) => {
     });
   }
 };
+// get the user room section form the 
+export const UserRoom=async (req: Request, res: Response)=>{
+   // @ts-ignore
+ const userId=req.userId;
+ console.log(userId)
+ try{
+  if(!userId){
+ return res.status(400).json({
+        status: false,
+        message: "User not login !",
+      });
+  }
+  const rooms=await prismaClient.room.findMany({
+    where:{
+      adminId:userId
+    }
+  })
+  console.log('Room -->',rooms)
+  return res.status(200).json({
+    status:true,
+   data:rooms,
+   message:"Get the  Rooms  Infroma " 
+  })
+}catch(err){
+  console.log(" Erorr -->", err);
+    return res.status(500).json({
+      status: false,
+      message: " Internal server problem !",
+    });
+  }
+}
+

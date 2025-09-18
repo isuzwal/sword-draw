@@ -59,6 +59,7 @@ wss.on("connection",  function connection(ws, request) {
   ws.on("error", console.error);
   ws.on("message", async function message(data) {
     const parsedData=JSON.parse(data as unknown as string) //  parser to JSON
+    console.log("HEHEH--->",parsedData)
     if(parsedData.type==="join_room"){
       const user=users.find((u)=>u.ws===ws)
       user?.rooms.push(parsedData.roomId)
@@ -73,6 +74,7 @@ wss.on("connection",  function connection(ws, request) {
     if(parsedData.type==="chat"){
       const roomId=(parsedData.roomId)
       const message=parsedData.message
+      console.log("Check the shpes ",message)
      if(!roomId){
       console.log("Room ID is miessing here ",roomId)
        ws.close();

@@ -1,5 +1,6 @@
 import axios from "axios";
 import { HTTP_BACKNED } from "../config";
+
 type Shape={
     type:"rectangle"
     x:number,
@@ -7,14 +8,28 @@ type Shape={
     width:number,
     height:number,
 } | {
-    type:"cricle",
+    type:"circle",
      centerX:number,
      centerY:number,
      radius:number,
-}
+} | {
+ type: "line";
+      x1: number;
+      y1: number;
+      x2: number;
+      y2: number;
 
-// take the argument 
-export  async function DrawInit(canvas:HTMLCanvasElement,roomId:string,socket:WebSocket){
+}|{
+      type: "text";
+      x: number;
+      y: number;
+      text: string;
+    };
+
+// take the argument  to hit the backedend and web-scoket connction
+export  async function DrawInit(canvas:HTMLCanvasElement,roomId:string,socket:WebSocket,
+    activeShape: "rectangle" | "circle" | "line" | "text"
+){
   try{
 
     const ctx=canvas.getContext("2d");
@@ -28,7 +43,7 @@ export  async function DrawInit(canvas:HTMLCanvasElement,roomId:string,socket:We
     // sokcet connection
     socket.onmessage=(event)=>{
       const message=JSON.parse(event.data);
-      console.log("At thre message in scoket--->",message)
+     
       if(message==="chat"){
         const parsedShape=JSON.parse(message.message)
         exitingShape.push(parsedShape); 
@@ -53,13 +68,23 @@ export  async function DrawInit(canvas:HTMLCanvasElement,roomId:string,socket:We
       const width=e.clientX-startX;
       const height=e.clientY-startY; 
       // push the shape of the shape after the  mouse-up 
-      const shape:Shape={
-        type:"rectangle",
-        x:startX,
-        y:startY,
-        width,
-        height,
+       let shape: Shape;
+      if (activeShape === "rectangle") {
+        shape = { type: "rectangle", x: startX, y: startY, width, height };
+      } else if (activeShape === "circle") {
+        const radius = Math.sqrt(width * width + height * height) / 2;
+        shape = { type: "circle", centerX: startX, centerY: startY, radius };
+      } else if (activeShape==="line"){
+         shape={type:'line' ,  x1: startX,y1: startY, x2: e.clientX,y2: e.clientY,}
+
+      // }else if (activeShape==='text'){
+      //    shape={type: "text", x: e.clientX,y: e.clientY, text:,}
+      // }
+      }else{
+        return ;
       }
+            
+          
       // sending the socket backend 
       exitingShape.push(shape)
       socket.send(JSON.stringify({
@@ -80,7 +105,23 @@ export  async function DrawInit(canvas:HTMLCanvasElement,roomId:string,socket:We
         clearCnavas(exitingShape,canvas,ctx)
         ctx.strokeStyle="rgba(255,255,255,1)";
         ctx.lineWidth = 1;
-        ctx.strokeRect(startX,startY,width,height)
+        // change the shape according to the type of the activeShape
+
+       if (activeShape === "rectangle") {
+          ctx.strokeRect(startX, startY, width, height);
+        } else if (activeShape === "circle") {
+          const radius = Math.sqrt(width * width + height * height) / 2;
+          ctx.beginPath();
+          ctx.arc(startX, startY, radius, 0, Math.PI * 2);
+          ctx.stroke();
+        }else if(activeShape==='line'){
+          ctx.beginPath(),
+        ctx.moveTo(startX, startY);  
+        ctx.lineTo(e.clientX, e.clientY);
+          ctx.stroke()
+        }else{
+          return ;
+        }
       }
     })
   }catch(err){
@@ -93,15 +134,30 @@ function clearCnavas(exitingShape:Shape[], canvas:HTMLCanvasElement,ctx:CanvasRe
   // claer the canvas
     ctx.clearRect(0,0,canvas.width,canvas.height);
   // ctx.fillStyle="rgba(18,18,18,18)";
-
+ // geeting the all exsting shaep from the backedn  here need to do for fextr and line also 
   exitingShape.map((shape)=>{
     if(shape.type=="rectangle"){
         ctx.strokeStyle="rgba(255,255,255,1)";
         ctx.strokeRect(shape.x,shape.y,shape.width,shape.height)
     }
+      if (shape.type === "circle") {
+      ctx.beginPath();
+      ctx.arc(shape.centerX, shape.centerY, shape.radius, 0, Math.PI * 2);
+      ctx.stroke();
+    }
+    if(shape.type==='line'){
+      ctx.beginPath(),
+      ctx.moveTo(shape.x1,shape.y1)
+      ctx.lineTo(shape.y1,shape.y2)
+    }
+    if (shape.type === "text") {
+  ctx.font = "16px Arial";
+  ctx.fillStyle = "white";
+  ctx.fillText(shape.text, shape.x, shape.y);
+}
   })
 }
- //  hiting the roomId backend
+ //  get the all drawing shape from the backend of the room 
  async function FetchingAllShape(roomId:string) {
   const token = localStorage.getItem("token");
   try{
@@ -113,9 +169,10 @@ function clearCnavas(exitingShape:Shape[], canvas:HTMLCanvasElement,ctx:CanvasRe
     });
 
     const data = res?.data?.data?.chat ?? [];
-
+    console.log("Fetching the all shapes ",data)
     const shapes=data.map((data:{message:string})=>{
       const messageshapes=JSON.parse(data.message)
+      console.log("MessageSHAPE--->",messageshapes.shape)
       return messageshapes.shape;
     })
    

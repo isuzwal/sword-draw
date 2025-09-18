@@ -1,5 +1,5 @@
 "use client";
-import { LoaderCircle, X } from "lucide-react";
+import { LoaderCircle, X ,RefreshCcw, RotateCw} from "lucide-react";
 import { Label } from "../ui/label";
 import { Input } from "../ui/input";
 import { useState, useEffect } from "react";
@@ -9,6 +9,8 @@ import { HTTP_BACKNED } from "@/app/config";
 import { toast } from "sonner";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "../ui/tabs";
 
+import Link from "next/link";
+import { Loadingroom } from "./loading";
 interface Room {
   show: boolean;
   onShow: () => void;
@@ -68,17 +70,21 @@ export function RoomForm({ show, onShow }: Room) {
       toast.error("You must log in first");
       return;
     }
+    setLoading(true)
     try {
       const res = await axios.get(`${HTTP_BACKNED}/rooms`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       setRooms(res.data.data || []); 
-      console.log(res)// ✅ backend sends `data`
+   
       toast.success("Rooms loaded");
     } catch (err: any) {
       toast.error("Could not load rooms");
+    }finally{
+      setLoading(false)
     }
   };
+
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
@@ -97,7 +103,6 @@ export function RoomForm({ show, onShow }: Room) {
             <TabsTrigger
               value="get-room"
               className="cursor-pointer"
-              onClick={handleId}
             >
               Room Id
             </TabsTrigger>
@@ -136,26 +141,34 @@ export function RoomForm({ show, onShow }: Room) {
 
           {/* Get Rooms */}
           <TabsContent value="get-room">
-            <Label className="flex flex-col items-start p-1">
+            <Label className="flex  items-center justify-between px-3 py-1 ">
               <p className="font-semibold text-neutral-600 text-md">
                 Your Rooms:
               </p>
+              <div     onClick={handleId} className="bg-zinc-200 rounded-full  cursor-pointer  h-7 w-7 flex items-center justify-center shadow-xs border border-zinc-100 ">
+               {loading ? (
+                 <RotateCw size={18} className="text-neutral-600 animate-spin " />
+                ):(
+                 <RotateCw  size={18} className="text-neutral-600"/>
+               )}
+              </div>
             </Label>
             <div className="h-44  overflow-y-auto scrollbar-hide">
             {rooms.length > 0 ? (
-              <div className="flex flex-col gap-2 border  border-slate-100 p-2 rounded-md shadow-sm">
+              <div className="flex flex-col gap-2 border  border-slate-200 p-2 rounded-md shadow-sm">
                  {rooms.map((room ,idx)=>(
-                   <div   key={idx} className="flex  p-2  rounded-md   border border-neutral-200  flex-col gap-1 ">
+                   <div   key={idx} className="flex  p-2  rounded-md   border border-neutral-200   bg-neutral-100 shadow flex-col gap-1 ">
                   <h2 className="text-neutral-800 text-md font-semibold">Room name:{" "}{room.slug}</h2>
                   <p className="text-neutral-700 text-sm font-semibold">RoomId{" "}:{room.id}</p>
-                  <Button  className="cursor-pointer">Join Room</Button>
+                  <Link  href={`/canvas/${room.id}`} className="w-full bg-black rounded-md p-2 text-neutral-200 font-semibold text-sm text-center">Join room</Link>
+                  
                   </div>
                  ))}
             
                 </div>
             ) : (
-              <p className="text-sm text-gray-500 pl-6">
-                No rooms available. Create one first!
+              <p className="text-sm font-medium text-gray-500 p-2">
+                Reload the page  if did't show the  your rooms after create room . 
               </p>
             )}
             </div>

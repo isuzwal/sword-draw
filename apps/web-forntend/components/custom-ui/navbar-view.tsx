@@ -61,7 +61,7 @@ export function Navbarpage() {
               <Button onClick={() => setShow(true)} className="w-full">
                 Create space
               </Button>
-              <Link href={"/profile"} className="border border-slate-100 cursor-pointer rounded-md">
+              <Link href={"/profile"} className="border w-full border-slate-100 cursor-pointer rounded-md">
                 <Button variant={"secondary"} className="w-full">
                   Profile
                 </Button>

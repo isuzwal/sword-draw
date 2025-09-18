@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 
 import { WS_URL } from "../config";
 import { MainCanvasPage } from "./main-canvas-view";
+import { Loadingroom } from "@/components/custom-ui/loading";
 
 export default function CanvaPage({ roomId }: { roomId: string }) {
   // connection for the socket
@@ -11,6 +12,7 @@ export default function CanvaPage({ roomId }: { roomId: string }) {
 
   useEffect(() => {
     // sending the token as the parms 
+    // sending  the  join_room tytpe when use hit the Link button 
     const token=localStorage.getItem("token");
     const ws = new WebSocket(`${WS_URL}?token=${token}`);
     ws.onopen = () => {
@@ -29,7 +31,7 @@ export default function CanvaPage({ roomId }: { roomId: string }) {
   }; 
   },[roomId]);
   if (!socket) {
-    return <div>Connecting to web-scoket....</div>;
+    return <Loadingroom />;
   }
 
   // show this components after the web-scoket it connect then show it

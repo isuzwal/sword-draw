@@ -192,7 +192,26 @@ function isValidShape(shape: any): shape is Shape {
 }
 
 // Get all drawing shapes from the backend for a room 
-async function FetchingAllShape(roomId: string): Promise<Shape[]> {
+ export async function FetchingAllShape(roomId: string): Promise<Shape[]> {
+    const token = localStorage.getItem("token");
+    try {
+        const res = await axios.get(`${HTTP_BACKNED}/chat/${roomId}`, {
+            headers: {
+                Authorization: `Bearer ${token}`
+            }
+        });
+
+        const data = res?.data?.data?.chat ?? [];
+        const content = data.map((d: any) => d.content).filter(isValidShape);
+        console.log("Form the backedn ",content)
+        return content;
+    } catch(err) {
+        console.log("Error fetching shapes:", err);
+        return [];
+    }
+}
+// Get all drawing shapes from the backend for a room 
+ export async function JoinRoomCanavas(roomId: string): Promise<Shape[]> {
     const token = localStorage.getItem("token");
     try {
         const res = await axios.get(`${HTTP_BACKNED}/chat/${roomId}`, {

@@ -171,7 +171,7 @@ export const RoomChat = async (req: Request, res: Response) => {
       orderBy: {
         id: "desc",
       },
-      take: 30,
+  
     });
     if (chat.length > 0) {
       return res.status(200).json({

@@ -3,103 +3,160 @@ import jwt from "jsonwebtoken";
 import { JWT_SCERT } from "@repo/backend-common/config";
 import { prismaClient } from "@repo/db/clinet";
 
-
 interface User {
   ws: WebSocket;
   rooms: string[];
   userId: string;
 }
-// gobal user array
+
+// Global user array
 const users: User[] = [];
-// Web-Soocket connection
+// WebSocket server
 const wss = new WebSocketServer({ port: 8080 });
-
-// checking the user have token or not
 function usercheck(token: string): string | null {
-
+  if (!JWT_SCERT) {
+    return null;
+  }
   
-  if( !JWT_SCERT){
-     return  null ;
- }
-  try{
+  try {
     const decode = jwt.verify(token, JWT_SCERT);
-    if (typeof decode == "string") {
+    if (typeof decode === "string") {
       return null;
     }
     if (!decode || !decode.userId) {
       return null;
     }
     return decode.userId;
-  }catch(e){
-      return null ;
+  } catch (e) {
+    return null;
   }
 }
 
-wss.on("connection",  function connection(ws, request) {
-  const url = request.url; //  (when the user try to connected  get the url ws://localhost:3000?token=124de )
+wss.on("connection", function connection(ws, request) {
+  const url = request.url;
   if (!url) {
+    ws.close();
     return;
   }
-  // get the the token from the url prams
-  // ["WS:://localhsot:3000","token=12345"->split grt first arg
+  
   const queryParms = new URLSearchParams(url.split("?")[1]);
-  const token = queryParms.get("token") || " ";
-  // decode the token only then connection
+  const token = queryParms.get("token") || "";
   const userId = usercheck(token);
-  if (userId == null) {
+  
+  if (userId === null) {
     ws.close();
-    return ;
+    return;
   }
-  users.push({
-    userId,
-    rooms: [],
-    ws,
-  });
+
+  // Check if user already exists
+  const existing = users.find(u => u.userId === userId);
+  if (existing) {
+    // Update the WebSocket connection for existing user
+    existing.ws = ws;
+    console.log('Updated WebSocket for existing user:', userId);
+  } else {
+    users.push({
+      userId,
+      rooms: [],
+      ws,
+    });
+    console.log('New user connected:', userId);
+  }
 
   ws.on("error", console.error);
+  
   ws.on("message", async function message(data) {
-    const parsedData=JSON.parse(data as unknown as string) //  parser to JSON
-    console.log("HEHEH--->",parsedData)
-    if(parsedData.type==="join_room"){
-      const user=users.find((u)=>u.ws===ws)
-      user?.rooms.push(parsedData.roomId)
-    }
-    // close room
-     if(parsedData.type==="leave_room"){
-      const user=users.find((u)=>u.ws===ws)
-       if (user) {
-      user.rooms = user.rooms.filter(room => room !== parsedData.roomId);
-    }
-    }
-    if(parsedData.type==="chat"){
-      const roomId=(parsedData.roomId)
-      const message=parsedData.message
-      console.log("Check the shpes ",message)
-     if(!roomId){
-      console.log("Room ID is miessing here ",roomId)
-       ws.close();
-     }
-      // store the chat before sending to wss but not  it better 
-      await prismaClient.chat.create({
-        data:{
-          roomId:Number(roomId),
-          message,
-          userId
+    try {
+      const parsedData = JSON.parse(data.toString());
+      console.log("Received data:", parsedData);
+      
+    if (parsedData.type === "join_room") {
+  const user = users.find((u) => u.ws === ws);
+  if (user && !user.rooms.includes(parsedData.roomId)) {
+    user.rooms.push(parsedData.roomId);
+    console.log(`User ${userId} joined room ${parsedData.roomId}`);
+  }
 
+  // Fetch all existing shapes for this room from DB
+  try {
+    const existingShapes = await prismaClient.chat.findMany({
+      where: { roomId: Number(parsedData.roomId) },
+      orderBy: { id: "asc" }, // oldest first
+    });
+
+ 
+    ws.send(JSON.stringify({
+      type: "room_history",
+      roomId: parsedData.roomId,
+      content: existingShapes.map(shape => shape.content)
+    }));
+    console.log("Whil another  user join  room ",existingShapes)
+  } catch (err) {
+    console.error("Error fetching room history:", err);
+  }
+}
+      else if (parsedData.type === "leave_room") {
+        const user = users.find((u) => u.ws === ws);
+        if (user) {
+          user.rooms = user.rooms.filter(room => room !== parsedData.roomId);
+          console.log(`User ${userId} left room ${parsedData.roomId}`);
         }
-       })
-     
-       // for the all each user
-      users.forEach(user=>{
-        if(user.rooms.includes(roomId)){
-          user.ws.send(JSON.stringify({
-            type:"chat",
-            message:message,
-            roomId
-          }))
+      }
+      
+      else if (parsedData.type === "chat") {
+        const { roomId, message } = parsedData;
+        const content = message?.content;
+        
+        if (!roomId || !content) {
+          return;
         }
-      })
+
+        // Save to database ONCE
+        try {
+          await prismaClient.chat.create({
+            data: {
+              roomId: Number(roomId),
+              content,
+              userId
+            }
+          });
+          console.log("Shape saved to database for room:", roomId);
+        } catch (dbError) {
+          console.error("Database error:", dbError);
+          return;
+        }
+
+ 
+        const usersInRoom = users.filter(user => 
+          user.rooms.includes(roomId) && user.ws !== ws
+        );
+
+        usersInRoom.forEach(user => {
+          if (user.ws.readyState === WebSocket.OPEN) {
+            user.ws.send(JSON.stringify({
+              type: "chat",
+              content,
+              roomId,
+              userId 
+            }));
+          }
+        });
+      }
+    } catch (error) {
+      console.error("Error processing message:", error);
     }
   });
-  ws.send("Hello");
+
+  // Clean up on disconnect
+  ws.on("close", () => {
+    const userIndex = users.findIndex(u => u.ws === ws);
+    if (userIndex !== -1) {
+      
+      users.splice(userIndex, 1);
+    }
+  });
+
+  ws.send(JSON.stringify({ type: "connection",  }));
 });
+
+console.log("WebSocket server running on port 8080");

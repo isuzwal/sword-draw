@@ -53,10 +53,11 @@ export function LoginPage() {
         router.push("/");
       }
     } catch (err: any) {
+      console.log(err)
       if (err.response) {
-        toast.error(err.response.data.error || "Something went  wrong ");
+        toast.error(err.response.data.message);
       } else {
-        toast.error("Networking error");
+        toast.warning("Networking error");
       }
     } finally {
       setLoading(false);

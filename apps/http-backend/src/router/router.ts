@@ -73,7 +73,11 @@ export const Login = async (req: Request, res: Response) => {
     // pasword compare
     const is_paswordMatch = await compare(password, is_Existinguser.password);
     if (!is_paswordMatch) {
-      throw new Error("Invalid credentials");
+      return res.status(404).json({
+      status: true,
+       message:'Paasword incorrect !'
+    });
+     
     }
     if (!JWT_SCERT) {
       return;

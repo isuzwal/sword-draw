@@ -4,8 +4,10 @@ import Link from "next/link";
 import { Button } from "../ui/button";
 import { useState, useEffect } from "react";
 import { RoomForm } from "./room-form";
-
+import { useRouter } from "next/navigation";
+import { toast } from "sonner";
 export function Navbarpage() {
+  const router=useRouter()
   const [show, setShow] = useState<boolean>(false);
   const [expanded, setExpaned] = useState(false);
   const [token, setToken] = useState<string | null>(null);
@@ -13,7 +15,15 @@ export function Navbarpage() {
   useEffect(() => {
     setToken(localStorage.getItem("token"));
   }, []);
-
+ 
+  const handleLogout=async()=>{
+    try{
+      localStorage.removeItem("token")
+     router.push('/login')
+    } catch(error:any){
+      toast.error('Something went wrong try  again !')
+    }
+  }
   return (
     <div className="max-w-7xl mx-auto w-full rounded-lg mt-2 p-1 border border-neutral-200 shadow-[0_1px_1px_rgba(0,0,0,0.05),0_4px_8px_rgba(34,42,53,0.04),0_24px_68px_rgba(47,48,55,0.05),0_2px_3px_rgba(0,0,0,0.04)]">
       <div className="w-full flex items-center justify-between px-3 py-2">
@@ -33,9 +43,11 @@ export function Navbarpage() {
               <Button onClick={() => setShow(true)} className="w-full cursor-pointer">
                 Create space
               </Button>
-              <Link href={"/profile"} className="border border-slate-100  rounded-md">
-                <Button variant={"secondary"}  className="cursor-pointer">Profile</Button>
-              </Link>
+               <div className="border w-full border-slate-100  rounded-md">
+                <Button onClick={handleLogout}  variant={'destructive'} className="w-full cursor-pointer">
+                  Logout
+                </Button>
+              </div>
             </div>
           ) : (
             <Link
@@ -61,11 +73,11 @@ export function Navbarpage() {
               <Button onClick={() => setShow(true)} className="w-full">
                 Create space
               </Button>
-              <Link href={"/profile"} className="border w-full border-slate-100 cursor-pointer rounded-md">
-                <Button variant={"secondary"} className="w-full">
-                  Profile
+              <div className="border w-full border-slate-100  rounded-md">
+                <Button  onClick={handleLogout}  variant={'destructive'} className="w-full cursor-pointer">
+                  Logout
                 </Button>
-              </Link>
+              </div>
             </>
           ) : (
             <Link

@@ -7,35 +7,49 @@ type Shape =
   | { type: "line"; x1: number; y1: number; x2: number; y2: number }
   | { type: "ellipse"; centerX: number; centerY: number; radiusX: number; radiusY: number; rotation?: number }
   | { type: "curve"; startX: number; startY: number; cp1x: number; cp1y: number; cp2x: number; cp2y: number; endX: number; endY: number }
-  | {type: "half-circle"; centerX: number; centerY: number;   radius: number; direction?: "top" | "bottom" | "left" | "right";}
+  | {type: "half-circle"; centerX: number; centerY: number; radius: number; direction?: "top" | "bottom" | "left" | "right";}
 
 export async function DrawInit(
   canvas: HTMLCanvasElement,
   roomId: string,
   socket: WebSocket,
-  activeShapeRef: React.MutableRefObject<"rectangle" | "circle" | "line" | "ellipse" | "curve" | "half-circle">
+  activeShapeRef: React.MutableRefObject<"rectangle" | "circle" | "line" | "ellipse" | "curve" | "half-circle">,
+  zoomRef: React.MutableRefObject<number>,
+  setZoom: React.Dispatch<React.SetStateAction<number>>
 ) {
   try {
     const ctx = canvas.getContext("2d");
-
     let exitingShape: Shape[] = await FetchingAllShape(roomId);
 
     if (!ctx) {
       return;
     }
-
     socket.onmessage = (event) => {
       const message = JSON.parse(event.data);
       if (message.type === "chat") {
         const newShape = message.content;
         if (newShape && isValidShape(newShape)) {
           exitingShape.push(newShape);
-          clearCanvas(exitingShape, canvas, ctx);
+          clearCanvas(exitingShape, canvas, ctx, zoomRef.current);
         }
       }
     };
 
-    clearCanvas(exitingShape, canvas, ctx);
+    clearCanvas(exitingShape, canvas, ctx, zoomRef.current);    
+    canvas.addEventListener("wheel", (e) => {
+      e.preventDefault();
+      const zoomAmount = 0.1;
+      let newZoom = zoomRef.current;
+      
+      if (e.deltaY < 0) {
+        newZoom += zoomAmount;
+      } else {
+        newZoom = Math.max(0.1, newZoom - zoomAmount); 
+      }
+      zoomRef.current = newZoom;
+      setZoom(newZoom);
+      clearCanvas(exitingShape, canvas, ctx, newZoom);
+    });
 
     let clicked = false;
     let startX = 0;
@@ -44,8 +58,9 @@ export async function DrawInit(
     canvas.addEventListener("mousedown", (e) => {
       clicked = true;
       const rect = canvas.getBoundingClientRect();
-      startX = e.clientX - rect.left;
-      startY = e.clientY - rect.top;
+   
+      startX = (e.clientX - rect.left) / zoomRef.current;
+      startY = (e.clientY - rect.top) / zoomRef.current;
     });
 
     canvas.addEventListener("mouseup", (e) => {
@@ -53,8 +68,9 @@ export async function DrawInit(
       clicked = false;
 
       const rect = canvas.getBoundingClientRect();
-      const endX = e.clientX - rect.left;
-      const endY = e.clientY - rect.top;
+      // Adjust coordinates for zoom
+      const endX = (e.clientX - rect.left) / zoomRef.current;
+      const endY = (e.clientY - rect.top) / zoomRef.current;
       const width = endX - startX;
       const height = endY - startY;
 
@@ -75,15 +91,13 @@ export async function DrawInit(
         const centerY = startY + height / 2;
         shape = { type: "ellipse", centerX, centerY, radiusX, radiusY, rotation: 0 };
       } else if (currentActiveShape === "curve") {
-        // crude control points for now
         const cp1x = (startX + endX) / 2;
         const cp1y = startY - 50;
         const cp2x = (startX + endX) / 2;
         const cp2y = endY + 50;
         shape = { type: "curve", startX, startY, cp1x, cp1y, cp2x, cp2y, endX, endY };
-      }  else if (currentActiveShape === "half-circle") {
-      ctx.beginPath();
-      const radius = Math.sqrt(width * width + height * height) / 2;
+      } else if (currentActiveShape === "half-circle") {
+        const radius = Math.sqrt(width * width + height * height) / 2;
         const centerX = startX + width / 2;
         const centerY = startY + height / 2;
         shape = {
@@ -93,12 +107,12 @@ export async function DrawInit(
           radius,
           direction: "bottom",
         };
-       }else {
+      } else {
         return;
       }
 
       exitingShape.push(shape);
-      clearCanvas(exitingShape, canvas, ctx);
+      clearCanvas(exitingShape, canvas, ctx, zoomRef.current);
 
       socket.send(
         JSON.stringify({
@@ -112,14 +126,18 @@ export async function DrawInit(
     canvas.addEventListener("mousemove", (e) => {
       if (clicked) {
         const rect = canvas.getBoundingClientRect();
-        const currentX = e.clientX - rect.left;
-        const currentY = e.clientY - rect.top;
+        // Adjust coordinates for zoom
+        const currentX = (e.clientX - rect.left) / zoomRef.current;
+        const currentY = (e.clientY - rect.top) / zoomRef.current;
         const width = currentX - startX;
         const height = currentY - startY;
         const currentActiveShape = activeShapeRef.current;
 
-        clearCanvas(exitingShape, canvas, ctx);
+        clearCanvas(exitingShape, canvas, ctx, zoomRef.current);
 
+        // Save the current transform before drawing preview
+        ctx.save();
+        ctx.scale(zoomRef.current, zoomRef.current);
         ctx.strokeStyle = "rgba(255,255,255,0.7)";
         ctx.lineWidth = 2;
         ctx.setLineDash([5, 5]);
@@ -155,19 +173,20 @@ export async function DrawInit(
 
           ctx.bezierCurveTo(cp1x, cp1y, cp2x, cp2y, currentX, currentY);
           ctx.stroke();
-        }else if (currentActiveShape === "half-circle") {
-      const radius = Math.sqrt(width * width + height * height) / 2;
-      const centerX = startX + width / 2;
-      const centerY = startY + height / 2;
-      const direction: "bottom"="bottom"; 
+        } else if (currentActiveShape === "half-circle") {
+          const radius = Math.sqrt(width * width + height * height) / 2;
+          const centerX = startX + width / 2;
+          const centerY = startY + height / 2;
+          const direction: "bottom" = "bottom";
 
-        ctx.beginPath();
-        // if (direction === "top") ctx.arc(centerX, centerY, radius, Math.PI, 0);
-        if (direction === "bottom") ctx.arc(centerX, centerY, radius, 0, Math.PI);
-        else if (direction === "left") ctx.arc(centerX, centerY, radius, 0.5 * Math.PI, 1.5 * Math.PI);
-        else if (direction === "right") ctx.arc(centerX, centerY, radius, 1.5 * Math.PI, 0.5 * Math.PI);
-        ctx.stroke();
-      }
+          ctx.beginPath();
+          if (direction === "bottom") ctx.arc(centerX, centerY, radius, 0, Math.PI);
+          else if (direction === "left") ctx.arc(centerX, centerY, radius, 0.5 * Math.PI, 1.5 * Math.PI);
+          else if (direction === "right") ctx.arc(centerX, centerY, radius, 1.5 * Math.PI, 0.5 * Math.PI);
+          ctx.stroke();
+        }
+        
+        ctx.restore();
         ctx.setLineDash([]);
       }
     });
@@ -177,9 +196,10 @@ export async function DrawInit(
   }
 }
 
-function clearCanvas(exitingShape: Shape[], canvas: HTMLCanvasElement, ctx: CanvasRenderingContext2D) {
+function clearCanvas(exitingShape: Shape[], canvas: HTMLCanvasElement, ctx: CanvasRenderingContext2D, scale = 1) {
   ctx.clearRect(0, 0, canvas.width, canvas.height);
-
+  ctx.save();
+  ctx.scale(scale, scale);
   ctx.strokeStyle = "rgba(255,255,255,1)";
   ctx.lineWidth = 2;
 
@@ -204,16 +224,18 @@ function clearCanvas(exitingShape: Shape[], canvas: HTMLCanvasElement, ctx: Canv
       ctx.moveTo(shape.startX, shape.startY);
       ctx.bezierCurveTo(shape.cp1x, shape.cp1y, shape.cp2x, shape.cp2y, shape.endX, shape.endY);
       ctx.stroke();
-    }else if (shape.type === "half-circle") {
-  ctx.beginPath();
-    const { centerX, centerY, radius, direction } = shape;
-    if (direction === "top") ctx.arc(centerX, centerY, radius, Math.PI, 0);
-    else if (direction === "bottom") ctx.arc(centerX, centerY, radius, 0, Math.PI);
-    else if (direction === "left") ctx.arc(centerX, centerY, radius, 0.5 * Math.PI, 1.5 * Math.PI);
-    else if (direction === "right") ctx.arc(centerX, centerY, radius, 1.5 * Math.PI, 0.5 * Math.PI);
-    ctx.stroke();
-  }
+    } else if (shape.type === "half-circle") {
+      ctx.beginPath();
+      const { centerX, centerY, radius, direction } = shape;
+      if (direction === "top") ctx.arc(centerX, centerY, radius, Math.PI, 0);
+      else if (direction === "bottom") ctx.arc(centerX, centerY, radius, 0, Math.PI);
+      else if (direction === "left") ctx.arc(centerX, centerY, radius, 0.5 * Math.PI, 1.5 * Math.PI);
+      else if (direction === "right") ctx.arc(centerX, centerY, radius, 1.5 * Math.PI, 0.5 * Math.PI);
+      ctx.stroke();
+    }
   });
+  
+  ctx.restore();
 }
 
 function isValidShape(shape: any): shape is Shape {
@@ -239,15 +261,14 @@ function isValidShape(shape: any): shape is Shape {
         typeof shape.endX === "number" &&
         typeof shape.endY === "number"
       );
+    case "half-circle":
+      return typeof shape.centerX === "number" && typeof shape.centerY === "number" && typeof shape.radius === "number";
     default:
       return false;
   }
 }
 
-
-
-// Get all drawing shapes from the backend for a room 
- export async function FetchingAllShape(roomId: string): Promise<Shape[]> {
+export async function FetchingAllShape(roomId: string): Promise<Shape[]> {
     const token = localStorage.getItem("token");
     try {
         const res = await axios.get(`${HTTP_BACKNED}/chat/${roomId}`, {
@@ -258,15 +279,15 @@ function isValidShape(shape: any): shape is Shape {
 
         const data = res?.data?.data?.chat ?? [];
         const content = data.map((d: any) => d.content).filter(isValidShape);
-        console.log("Form the backedn ",content)
+        console.log("Form the backend ", content)
         return content;
     } catch(err) {
         console.log("Error fetching shapes:", err);
         return [];
     }
 }
-// Get all drawing shapes from the backend for a room 
- export async function JoinRoomCanavas(roomId: string): Promise<Shape[]> {
+
+export async function JoinRoomCanavas(roomId: string): Promise<Shape[]> {
     const token = localStorage.getItem("token");
     try {
         const res = await axios.get(`${HTTP_BACKNED}/chat/${roomId}`, {
@@ -277,7 +298,7 @@ function isValidShape(shape: any): shape is Shape {
 
         const data = res?.data?.data?.chat ?? [];
         const content = data.map((d: any) => d.content).filter(isValidShape);
-        console.log("Form the backedn ",content)
+        console.log("Form the backend ", content)
         return content;
     } catch(err) {
         console.log("Error fetching shapes:", err);

@@ -23,7 +23,7 @@ export default function CanvaPage({ roomId }: { roomId: string }) {
       }))
     };
       ws.onerror = (err) => {
-        console.error("WS error:", err)
+        console.log("WS error:", err)
         return err
       }
      return () => {

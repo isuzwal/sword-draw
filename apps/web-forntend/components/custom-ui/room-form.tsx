@@ -55,7 +55,7 @@ export function RoomForm({ show, onShow }: Room) {
         toast.success(res.data.message || "Room created successfully");
       }
       setRoom("");
-      onShow();
+      
     } catch (err: any) {
       if (err.response) {
         toast.error(err.response.data.error || "Something went wrong");

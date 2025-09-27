@@ -53,7 +53,7 @@ wss.on("connection", function connection(ws, request) {
   if (existing) {
     // Update the WebSocket connection for existing user
     existing.ws = ws;
-    console.log('Updated WebSocket for existing user:', userId);
+  
   } else {
     users.push({
       userId,
@@ -68,7 +68,7 @@ wss.on("connection", function connection(ws, request) {
   ws.on("message", async function message(data) {
     try {
       const parsedData = JSON.parse(data.toString());
-      console.log("Received data:", parsedData);
+     
       
     if (parsedData.type === "join_room") {
   const user = users.find((u) => u.ws === ws);
@@ -90,7 +90,7 @@ wss.on("connection", function connection(ws, request) {
       roomId: parsedData.roomId,
       content: existingShapes.map(shape => shape.content)
     }));
-    console.log("Whil another  user join  room ",existingShapes)
+    
   } catch (err) {
     console.error("Error fetching room history:", err);
   }
@@ -99,7 +99,7 @@ wss.on("connection", function connection(ws, request) {
         const user = users.find((u) => u.ws === ws);
         if (user) {
           user.rooms = user.rooms.filter(room => room !== parsedData.roomId);
-          console.log(`User ${userId} left room ${parsedData.roomId}`);
+        
         }
       }
       
@@ -120,7 +120,7 @@ wss.on("connection", function connection(ws, request) {
               userId
             }
           });
-          console.log("Shape saved to database for room:", roomId);
+         
         } catch (dbError) {
           console.error("Database error:", dbError);
           return;

@@ -60,7 +60,7 @@ wss.on("connection", function connection(ws, request) {
       rooms: [],
       ws,
     });
-    console.log('New user connected:', userId);
+    
   }
 
   ws.on("error", console.error);
@@ -74,7 +74,7 @@ wss.on("connection", function connection(ws, request) {
   const user = users.find((u) => u.ws === ws);
   if (user && !user.rooms.includes(parsedData.roomId)) {
     user.rooms.push(parsedData.roomId);
-    console.log(`User ${userId} joined room ${parsedData.roomId}`);
+
   }
 
   // Fetch all existing shapes for this room from DB
@@ -105,6 +105,7 @@ wss.on("connection", function connection(ws, request) {
       
       else if (parsedData.type === "chat") {
         const { roomId, message } = parsedData;
+
         const content = message?.content;
         
         if (!roomId || !content) {

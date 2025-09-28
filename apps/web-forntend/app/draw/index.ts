@@ -2,12 +2,12 @@ import axios from "axios";
 import { HTTP_BACKNED } from "../config";
 
 type Shape =
-  | { type: "rectangle"; x: number; y: number; width: number; height: number }
-  | { type: "circle"; centerX: number; centerY: number; radius: number }
-  | { type: "line"; x1: number; y1: number; x2: number; y2: number }
-  | { type: "ellipse"; centerX: number; centerY: number; radiusX: number; radiusY: number; rotation?: number }
-  | { type: "curve"; startX: number; startY: number; cp1x: number; cp1y: number; cp2x: number; cp2y: number; endX: number; endY: number }
-  | {type: "half-circle"; centerX: number; centerY: number; radius: number; direction?: "top" | "bottom" | "left" | "right";}
+  | { type: "rectangle"; x: number; y: number; width: number; height: number ,color:string }
+  | { type: "circle"; centerX: number; centerY: number; radius: number,color:string }
+  | { type: "line"; x1: number; y1: number; x2: number; y2: number,color:string }
+  | { type: "ellipse"; centerX: number; centerY: number; radiusX: number; radiusY: number; rotation?: number,color:string }
+  | { type: "curve"; startX: number; startY: number; cp1x: number; cp1y: number; cp2x: number; cp2y: number; endX: number; endY: number,color:string }
+  | {type: "half-circle"; centerX: number; centerY: number; radius: number; direction?: "top" | "bottom" | "left" | "right" ,color:string;}
 
 export async function DrawInit(
   canvas: HTMLCanvasElement,
@@ -15,7 +15,8 @@ export async function DrawInit(
   socket: WebSocket,
   activeShapeRef: React.MutableRefObject<"rectangle" | "circle" | "line" | "ellipse" | "curve" | "half-circle">,
   zoomRef: React.MutableRefObject<number>,
-  setZoom: React.Dispatch<React.SetStateAction<number>>
+  setZoom: React.Dispatch<React.SetStateAction<number>>,
+  color:React.MutableRefObject<string>
 ) {
   try {
     const ctx = canvas.getContext("2d");
@@ -78,24 +79,24 @@ export async function DrawInit(
       const currentActiveShape = activeShapeRef.current;
 
       if (currentActiveShape === "rectangle") {
-        shape = { type: "rectangle", x: startX, y: startY, width, height };
+        shape = { type: "rectangle", x: startX, y: startY, width, height ,color:color.current};
       } else if (currentActiveShape === "circle") {
         const radius = Math.sqrt(width * width + height * height) / 2;
-        shape = { type: "circle", centerX: startX, centerY: startY, radius };
+        shape = { type: "circle", centerX: startX, centerY: startY, radius,color:color.current };
       } else if (currentActiveShape === "line") {
-        shape = { type: "line", x1: startX, y1: startY, x2: endX, y2: endY };
+        shape = { type: "line", x1: startX, y1: startY, x2: endX, y2: endY, color:color.current };
       } else if (currentActiveShape === "ellipse") {
         const radiusX = Math.abs(width) / 2;
         const radiusY = Math.abs(height) / 2;
         const centerX = startX + width / 2;
         const centerY = startY + height / 2;
-        shape = { type: "ellipse", centerX, centerY, radiusX, radiusY, rotation: 0 };
+        shape = { type: "ellipse", centerX, centerY, radiusX, radiusY, rotation: 0 ,color:color.current};
       } else if (currentActiveShape === "curve") {
         const cp1x = (startX + endX) / 2;
         const cp1y = startY - 50;
         const cp2x = (startX + endX) / 2;
         const cp2y = endY + 50;
-        shape = { type: "curve", startX, startY, cp1x, cp1y, cp2x, cp2y, endX, endY };
+        shape = { type: "curve", startX, startY, cp1x, cp1y, cp2x, cp2y, endX, endY,color:color.current };
       } else if (currentActiveShape === "half-circle") {
         const radius = Math.sqrt(width * width + height * height) / 2;
         const centerX = startX + width / 2;
@@ -106,6 +107,7 @@ export async function DrawInit(
           centerY,
           radius,
           direction: "bottom",
+          color:color.current
         };
       } else {
         return;
@@ -138,23 +140,27 @@ export async function DrawInit(
         // Save the current transform before drawing preview
         ctx.save();
         ctx.scale(zoomRef.current, zoomRef.current);
-        ctx.strokeStyle = "rgba(255,255,255,0.7)";
+        ctx.strokeStyle = currentActiveShape;
         ctx.lineWidth = 2;
         ctx.setLineDash([5, 5]);
 
         if (currentActiveShape === "rectangle") {
           ctx.strokeRect(startX, startY, width, height);
+             ctx.strokeStyle=color.current
         } else if (currentActiveShape === "circle") {
           const radius = Math.sqrt(width * width + height * height) / 2;
+          ctx.strokeStyle=color.current
           ctx.beginPath();
           ctx.arc(startX, startY, radius, 0, Math.PI * 2);
           ctx.stroke();
         } else if (currentActiveShape === "line") {
           ctx.beginPath();
+             ctx.strokeStyle=color.current
           ctx.moveTo(startX, startY);
           ctx.lineTo(currentX, currentY);
           ctx.stroke();
         } else if (currentActiveShape === "ellipse") {
+             ctx.strokeStyle=color.current
           const radiusX = Math.abs(width) / 2;
           const radiusY = Math.abs(height) / 2;
           const centerX = startX + width / 2;
@@ -165,7 +171,7 @@ export async function DrawInit(
         } else if (currentActiveShape === "curve") {
           ctx.beginPath();
           ctx.moveTo(startX, startY);
-
+      ctx.strokeStyle=color.current
           const cp1x = (startX + currentX) / 2;
           const cp1y = startY - 50;
           const cp2x = (startX + currentX) / 2;
@@ -175,6 +181,7 @@ export async function DrawInit(
           ctx.stroke();
         } else if (currentActiveShape === "half-circle") {
           const radius = Math.sqrt(width * width + height * height) / 2;
+             ctx.strokeStyle=color.current
           const centerX = startX + width / 2;
           const centerY = startY + height / 2;
           const direction: "bottom" = "bottom";
@@ -200,23 +207,27 @@ function clearCanvas(exitingShape: Shape[], canvas: HTMLCanvasElement, ctx: Canv
   ctx.clearRect(0, 0, canvas.width, canvas.height);
   ctx.save();
   ctx.scale(scale, scale);
-  ctx.strokeStyle = "rgba(255,255,255,1)";
   ctx.lineWidth = 2;
 
   exitingShape.forEach((shape) => {
+    ctx.beginPath();
+    ctx.strokeStyle=shape.color || "#000"
     if (shape.type === "rectangle") {
       ctx.strokeRect(shape.x, shape.y, shape.width, shape.height);
     } else if (shape.type === "circle") {
       ctx.beginPath();
+         ctx.strokeStyle=shape.color
       ctx.arc(shape.centerX, shape.centerY, shape.radius, 0, Math.PI * 2);
       ctx.stroke();
     } else if (shape.type === "line") {
       ctx.beginPath();
+    
       ctx.moveTo(shape.x1, shape.y1);
       ctx.lineTo(shape.x2, shape.y2);
       ctx.stroke();
     } else if (shape.type === "ellipse") {
       ctx.beginPath();
+      ctx.strokeStyle=""
       ctx.ellipse(shape.centerX, shape.centerY, shape.radiusX, shape.radiusY, 0, 0, Math.PI * 2);
       ctx.stroke();
     } else if (shape.type === "curve") {

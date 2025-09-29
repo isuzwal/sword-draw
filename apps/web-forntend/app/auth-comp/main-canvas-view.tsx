@@ -18,16 +18,32 @@ import { CircleHalf } from "phosphor-react";
 export function MainCanvasPage({ roomId, socket }: { roomId: string; socket: WebSocket }) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [zoom, setZoom] = useState(1);
-  const [Isopen, SetOpen] = useState<boolean>(false);
+  const [Isopen, SetOpen] = useState<boolean>(true);
   const [color, setColor] = useState("#f9f5f1");
+    const [dimensions, setDimensions] = useState({
+    width: window.innerWidth,
+    height: window.innerHeight,
+  });
   const [activeShape, setActiveShape] = useState<
     "rectangle" | "circle" | "line" | "ellipse" | "curve" | "half-circle"
   >("rectangle");
-  const width = window.innerWidth;
-  const height = window.innerHeight;
+ 
   const isInitializedRef = useRef(false);
   const activeShapeRef = useRef(activeShape);
   const zoomRef = useRef(zoom);
+
+  useEffect(() => {
+    const updateDimensions = () => {
+      setDimensions({
+        width: window.innerWidth,
+        height: window.innerHeight,
+      });
+    };
+    window.addEventListener('resize', updateDimensions);
+    return () => {
+      window.removeEventListener('resize', updateDimensions);
+    };
+  }, []);
 
   useEffect(() => {
     activeShapeRef.current = activeShape;
@@ -74,7 +90,9 @@ useEffect(() => {
 
   return (
     <div className="relative">
-      <canvas ref={canvasRef} width={width} height={height} className="bg-black cursor-crosshair" />
+      <canvas ref={canvasRef}  
+      width={dimensions.width}
+      height={dimensions.height}className="bg-black cursor-crosshair" />
 
       <div className="absolute top-2 w-full flex items-center justify-center px-2">
         <button
@@ -83,7 +101,7 @@ useEffect(() => {
           {Isopen ? <PanelRightOpen /> : <PanelLeftOpen />}
         </button>
         {Isopen && (
-          <div className="   flex  flex-col items-start justify-center absolute left-1 top-24 text-white  bg-zinc-950 border border-zinc-800 w-auto  h-auto  shadow-2xs  rounded-md p-2 ">
+          <div className="   transition duration-300  flex  flex-col items-start justify-center absolute left-1 top-24 text-white  bg-zinc-950 border border-zinc-800 w-auto  h-auto  shadow-2xs  rounded-md p-2 ">
             {colors.map((col) => (
               <button
                 key={col}
@@ -92,7 +110,7 @@ useEffect(() => {
                   backgroundColor: col,
                   border: color === col ? " black" : "transparent",
                 }}
-                className={` rounded-md flex   m-[1.5px] cursor-pointer  w-8 h-8 `}
+                className={` rounded-md flex   m-[1.5px] cursor-pointer  w-7 h-7 `}
               />
             ))}
           </div>
@@ -191,7 +209,7 @@ useEffect(() => {
       </div>
 
       {zoom !== 1 && (
-        <div className="absolute bottom-4 left-4 bg-zinc-900 bg-opacity-90 text-white px-3 py-2 rounded-lg text-sm">
+        <div className="absolute bottom-4  right-1 bg-zinc-900 bg-opacity-90 text-white px-3 py-2 rounded-lg text-sm">
           Zoom: {Math.round(zoom * 100)}%
         </div>
       )}

@@ -25,14 +25,14 @@ export function Navbarpage() {
     }
   }
   return (
-    <div className="max-w-7xl mx-auto w-full rounded-lg mt-2 p-1 border border-neutral-200 shadow-[0_1px_1px_rgba(0,0,0,0.05),0_4px_8px_rgba(34,42,53,0.04),0_24px_68px_rgba(47,48,55,0.05),0_2px_3px_rgba(0,0,0,0.04)]">
+    <div className=" rounded-xl mt-2   border border-neutral-200 ">
       <div className="w-full flex items-center justify-between px-3 py-2">
         <Link
           href="/"
-          className="flex border border-slate-200 gap-1 px-3 py-2 cursor-pointer items-center rounded-md text-neutral-600 font-semibold text-[10px]"
+          className="flex  gap-1 px-3 py-2 transition duration-300  cursor-pointer items-center rounded-md text-neutral-700  hover:text-neutral-400 "
         >
-          <Swords size="24" className="text-neutral-600" />
-          <h1 className="md:text-md text-sm font-semibold">Sword-Sketch</h1>
+          <Swords size="20" className="text-purple-500" />
+          <h1 className="text-base font-semibold">PrismArt</h1>
         </Link>
 
         <RoomForm show={show} onShow={() => setShow(false)} />

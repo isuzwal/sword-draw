@@ -1,135 +1,253 @@
-# Turborepo starter
+# 🎨 PrismArt - Collaborative Drawing Application
 
-This Turborepo starter is maintained by the Turborepo core team.
+A modern, real-time collaborative drawing application built with Next.js, WebSockets, and Prisma. PrismArt allows users to create shared drawing spaces, collaborate in real-time, and communicate through integrated chat functionality.
 
-## Using this example
+## ✨ Features
 
-Run the following command:
+- 🎨 **Real-time Collaborative Drawing** - Draw together with friends and colleagues in real-time
+- 💬 **Integrated Chat System** - Communicate while drawing with built-in chat functionality
+- 🔐 **User Authentication** - Secure login and registration system
+- 🏠 **Room Management** - Create and join drawing rooms with unique URLs
+- 📱 **Responsive Design** - Works seamlessly on desktop and mobile devices
+- ⚡ **Real-time Updates** - Instant synchronization of drawings and messages
+- 🎯 **Modern UI/UX** - Beautiful interface built with Tailwind CSS and Radix UI
 
-```sh
-npx create-turbo@latest
-```
+## 🏗️ Architecture
 
-## What's inside?
+This project is built as a monorepo using Turborepo with the following structure:
 
-This Turborepo includes the following packages/apps:
+### Applications
 
-### Apps and Packages
+- **`apps/web-forntend`** - Next.js frontend application
+- **`apps/http-backend`** - Express.js REST API server
+- **`apps/ws-backend`** - WebSocket server for real-time communication
 
-- `docs`: a [Next.js](https://nextjs.org/) app
-- `web`: another [Next.js](https://nextjs.org/) app
-- `@repo/ui`: a stub React component library shared by both `web` and `docs` applications
-- `@repo/eslint-config`: `eslint` configurations (includes `eslint-config-next` and `eslint-config-prettier`)
-- `@repo/typescript-config`: `tsconfig.json`s used throughout the monorepo
+### Packages
 
-Each package/app is 100% [TypeScript](https://www.typescriptlang.org/).
+- **`packages/common`** - Shared TypeScript types and utilities
+- **`packages/backend-common`** - Backend-specific shared code
+- **`packages/db`** - Prisma database schema and client
+- **`packages/eslint-config`** - Shared ESLint configurations
+- **`packages/typescript-config`** - Shared TypeScript configurations
 
-### Utilities
+## 🚀 Getting Started
 
-This Turborepo has some additional tools already setup for you:
+### Prerequisites
 
-- [TypeScript](https://www.typescriptlang.org/) for static type checking
-- [ESLint](https://eslint.org/) for code linting
-- [Prettier](https://prettier.io) for code formatting
+- Node.js >= 18
+- pnpm (recommended) or npm
+- PostgreSQL database
 
-### Build
+### Installation
 
-To build all apps and packages, run the following command:
+1. **Clone the repository**
+   ```bash
+   git clone <repository-url>
+   cd sword-sketch
+   ```
 
-```
-cd my-turborepo
+2. **Install dependencies**
+   ```bash
+   pnpm install
+   ```
 
-# With [global `turbo`](https://turborepo.com/docs/getting-started/installation#global-installation) installed (recommended)
-turbo build
+3. **Set up environment variables**
+   
+   Create `.env` files in the following locations:
+   
+   **Root `.env`:**
+   ```env
+   DATABASE_URL="postgresql://username:password@localhost:5432/prismart"
+   JWT_SECRET="your-jwt-secret-key"
+   ```
 
-# Without [global `turbo`](https://turborepo.com/docs/getting-started/installation#global-installation), use your package manager
-npx turbo build
-yarn dlx turbo build
-pnpm exec turbo build
-```
+4. **Set up the database**
+   ```bash
+   cd packages/db
+   npx prisma generate
+   npx prisma db push
+   ```
 
-You can build a specific package by using a [filter](https://turborepo.com/docs/crafting-your-repository/running-tasks#using-filters):
+5. **Start the development servers**
+   ```bash
+   # Start all applications
+   pnpm dev
+   
+   # Or start individual applications
+   pnpm dev --filter=web-forntend
+   pnpm dev --filter=http-backend
+   pnpm dev --filter=ws-backend
+   ```
 
-```
-# With [global `turbo`](https://turborepo.com/docs/getting-started/installation#global-installation) installed (recommended)
-turbo build --filter=docs
+## 🛠️ Development
 
-# Without [global `turbo`](https://turborepo.com/docs/getting-started/installation#global-installation), use your package manager
-npx turbo build --filter=docs
-yarn exec turbo build --filter=docs
-pnpm exec turbo build --filter=docs
-```
+### Available Scripts
 
-### Develop
+- **`pnpm dev`** - Start all applications in development mode
+- **`pnpm build`** - Build all applications and packages
+- **`pnpm lint`** - Run ESLint on all packages
+- **`pnpm format`** - Format code with Prettier
+- **`pnpm check-types`** - Run TypeScript type checking
 
-To develop all apps and packages, run the following command:
-
-```
-cd my-turborepo
-
-# With [global `turbo`](https://turborepo.com/docs/getting-started/installation#global-installation) installed (recommended)
-turbo dev
-
-# Without [global `turbo`](https://turborepo.com/docs/getting-started/installation#global-installation), use your package manager
-npx turbo dev
-yarn exec turbo dev
-pnpm exec turbo dev
-```
-
-You can develop a specific package by using a [filter](https://turborepo.com/docs/crafting-your-repository/running-tasks#using-filters):
-
-```
-# With [global `turbo`](https://turborepo.com/docs/getting-started/installation#global-installation) installed (recommended)
-turbo dev --filter=web
-
-# Without [global `turbo`](https://turborepo.com/docs/getting-started/installation#global-installation), use your package manager
-npx turbo dev --filter=web
-yarn exec turbo dev --filter=web
-pnpm exec turbo dev --filter=web
-```
-
-### Remote Caching
-
-> [!TIP]
-> Vercel Remote Cache is free for all plans. Get started today at [vercel.com](https://vercel.com/signup?/signup?utm_source=remote-cache-sdk&utm_campaign=free_remote_cache).
-
-Turborepo can use a technique known as [Remote Caching](https://turborepo.com/docs/core-concepts/remote-caching) to share cache artifacts across machines, enabling you to share build caches with your team and CI/CD pipelines.
-
-By default, Turborepo will cache locally. To enable Remote Caching you will need an account with Vercel. If you don't have an account you can [create one](https://vercel.com/signup?utm_source=turborepo-examples), then enter the following commands:
+### Project Structure
 
 ```
-cd my-turborepo
-
-# With [global `turbo`](https://turborepo.com/docs/getting-started/installation#global-installation) installed (recommended)
-turbo login
-
-# Without [global `turbo`](https://turborepo.com/docs/getting-started/installation#global-installation), use your package manager
-npx turbo login
-yarn exec turbo login
-pnpm exec turbo login
+sword-sketch/
+├── apps/
+│   ├── web-forntend/          # Next.js frontend
+│   │   ├── app/               # App router pages
+│   │   ├── components/        # React components
+│   │   └── lib/               # Utility functions
+│   ├── http-backend/          # Express.js API server
+│   │   ├── src/
+│   │   │   ├── controller/    # Route controllers
+│   │   │   ├── middleware/    # Express middleware
+│   │   │   └── router/        # API routes
+│   └── ws-backend/            # WebSocket server
+│       └── src/               # WebSocket handlers
+├── packages/
+│   ├── common/                # Shared types
+│   ├── backend-common/        # Backend utilities
+│   ├── db/                    # Database schema
+│   ├── eslint-config/         # ESLint configs
+│   └── typescript-config/     # TypeScript configs
+└── turbo.json                 # Turborepo configuration
 ```
 
-This will authenticate the Turborepo CLI with your [Vercel account](https://vercel.com/docs/concepts/personal-accounts/overview).
+## 🎨 Frontend (web-forntend)
 
-Next, you can link your Turborepo to your Remote Cache by running the following command from the root of your Turborepo:
+Built with Next.js 15, featuring:
 
+- **App Router** - Modern Next.js routing system
+- **Tailwind CSS** - Utility-first CSS framework
+- **Radix UI** - Accessible component primitives
+- **Framer Motion** - Animation library
+- **React Hook Form** - Form handling
+- **Zod** - Schema validation
+- **Sonner** - Toast notifications
+
+### Key Components
+
+- **Authentication Pages** - Login and signup forms
+- **Canvas View** - Main drawing interface
+- **Room Management** - Create and join drawing rooms
+- **Chat Interface** - Real-time messaging
+- **Navigation** - Responsive navbar with user controls
+
+## 🔧 Backend Services
+
+### HTTP Backend (http-backend)
+
+Express.js server providing:
+
+- **User Authentication** - JWT-based auth with bcrypt password hashing
+- **Room Management** - CRUD operations for drawing rooms
+- **User Management** - User registration and profile management
+- **CORS Support** - Cross-origin resource sharing
+
+### WebSocket Backend (ws-backend)
+
+Real-time communication server featuring:
+
+- **Drawing Synchronization** - Real-time drawing updates
+- **Chat Messaging** - Instant message delivery
+- **Room Management** - User join/leave notifications
+- **Connection Handling** - Robust WebSocket connection management
+
+## 🗄️ Database
+
+PostgreSQL database with Prisma ORM:
+
+### Schema
+
+- **User** - User accounts with authentication
+- **Room** - Drawing rooms with unique slugs
+- **Chat** - Messages within rooms
+
+### Key Features
+
+- **UUID Primary Keys** - Secure user identification
+- **Unique Constraints** - Email and room slug uniqueness
+- **Relationships** - Proper foreign key relationships
+- **Timestamps** - Automatic creation timestamps
+
+## 🔐 Authentication
+
+- **JWT Tokens** - Secure authentication tokens
+- **Password Hashing** - bcrypt for secure password storage
+- **Protected Routes** - Authentication middleware
+- **Session Management** - Client-side token storage
+
+## 🌐 API Endpoints
+
+### Authentication
+- `POST /auth/register` - User registration
+- `POST /auth/login` - User login
+- `POST /auth/logout` - User logout
+
+### Rooms
+- `GET /rooms` - List user's rooms
+- `POST /rooms` - Create new room
+- `GET /rooms/:slug` - Get room details
+- `DELETE /rooms/:id` - Delete room
+
+### Users
+- `GET /users/profile` - Get user profile
+- `PUT /users/profile` - Update user profile
+
+## 🚀 Deployment
+
+### Environment Variables
+
+Ensure the following environment variables are set:
+
+```env
+# Database
+DATABASE_URL="postgresql://username:password@host:port/database"
+
+# JWT
+JWT_SECRET="your-secure-jwt-secret"
+
+# CORS (if needed)
+CORS_ORIGIN="http://localhost:3000"
 ```
-# With [global `turbo`](https://turborepo.com/docs/getting-started/installation#global-installation) installed (recommended)
-turbo link
 
-# Without [global `turbo`](https://turborepo.com/docs/getting-started/installation#global-installation), use your package manager
-npx turbo link
-yarn exec turbo link
-pnpm exec turbo link
+### Build for Production
+
+```bash
+# Build all applications
+pnpm build
+
+# Start production servers
+pnpm start
 ```
 
-## Useful Links
+## 🤝 Contributing
 
-Learn more about the power of Turborepo:
+1. Fork the repository
+2. Create a feature branch (`git checkout -b feature/amazing-feature`)
+3. Commit your changes (`git commit -m 'Add some amazing feature'`)
+4. Push to the branch (`git push origin feature/amazing-feature`)
+5. Open a Pull Request
 
-- [Tasks](https://turborepo.com/docs/crafting-your-repository/running-tasks)
-- [Caching](https://turborepo.com/docs/crafting-your-repository/caching)
-- [Remote Caching](https://turborepo.com/docs/core-concepts/remote-caching)
-- [Filtering](https://turborepo.com/docs/crafting-your-repository/running-tasks#using-filters)
-- [Configuration Options](https://turborepo.com/docs/reference/configuration)
-- [CLI Usage](https://turborepo.com/docs/reference/command-line-reference)
+## 📝 License
+
+This project is licensed under the ISC License - see the [LICENSE](LICENSE) file for details.
+
+## 👨‍💻 Author
+
+**uzwal**
+- Twitter: [@isuzwal](https://twitter.com/isuzwal)
+- GitHub: [@isuzwal](https://github.com/isuzwal)
+
+## 🙏 Acknowledgments
+
+- Built with [Next.js](https://nextjs.org/)
+- Styled with [Tailwind CSS](https://tailwindcss.com/)
+- UI components from [Radix UI](https://www.radix-ui.com/)
+- Database management with [Prisma](https://www.prisma.io/)
+- Monorepo management with [Turborepo](https://turbo.build/)
+
+---
+
+**PrismArt** - Where creativity meets collaboration! 🎨✨

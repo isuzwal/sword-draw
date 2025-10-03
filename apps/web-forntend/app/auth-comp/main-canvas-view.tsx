@@ -14,11 +14,12 @@ import {
   User2Icon,
 } from "lucide-react";
 import React, { useState } from "react";
-
+import { Userdata } from "../draw/user";
 import { CircleHalf } from "phosphor-react";
 
 export function MainCanvasPage({ roomId, socket }: { roomId: string; socket: WebSocket }) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
+  const [userdata, setData] = useState<any>(null)
   const [zoom, setZoom] = useState(1);
   const [Isopen, SetOpen] = useState<boolean>(true);
   const [color, setColor] = useState("#f9f5f1");
@@ -33,6 +34,20 @@ export function MainCanvasPage({ roomId, socket }: { roomId: string; socket: Web
   const isInitializedRef = useRef(false);
   const activeShapeRef = useRef(activeShape);
   const zoomRef = useRef(zoom);
+
+  // Fetch user data
+  useEffect(() => {
+    const fetchUser = async () => {
+      try {
+        const data = await Userdata();
+        setData(data.data);
+      } catch (error) {
+        console.error('Error fetching user data:', error);
+        setData(null);
+      }
+    };
+    fetchUser();
+  }, []); 
 
   useEffect(() => {
     const updateDimensions = () => {
@@ -95,8 +110,16 @@ useEffect(() => {
       <canvas ref={canvasRef}  
       width={dimensions.width}
       height={dimensions.height}className="bg-black cursor-crosshair" />
-
         
+   
+     <div className="absolute top-2 right-2 rounded-lg bg-zinc-950 bg-opacity-90 border border-zinc-900 shadow-lg">
+          {userdata && (
+            <div className="flex items-center gap-2 px-3 py-2 text-neutral-300">
+              <User2Icon size={16} />
+              <span className="text-sm font-medium">{userdata.name || 'User'}</span>
+            </div>
+          )}
+     </div>
       <div className="absolute top-2 w-full flex items-center justify-center px-2">
         <button
           className="absolute left-3  top-14 bg-zinc-800 text-neutral-400   shadow rounded-md p-[2px] border border-zinc-800   cursor-pointer "
@@ -219,5 +242,4 @@ useEffect(() => {
     </div>
   );
 }
-
 

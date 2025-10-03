@@ -26,9 +26,7 @@ export default function CanvaPage({ roomId }: { roomId: string }) {
         console.log("WS error:", err)
         return err
       }
-     return () => {
-    ws.close();
-  }; 
+  
   },[roomId]);
   if (!socket) {
     return <Loadingroom />;

@@ -100,6 +100,29 @@ export const Login = async (req: Request, res: Response) => {
   }
 };
 // middleware
+export const AccountInfo=async (req:Request, res:Response) => {
+  try{
+    // @ts-ignore
+    const userId = req.userId;
+    if(!userId){
+      return res.status(404).json({
+        status:false,
+        message:"Missing the userId"
+      })
+    }
+      const user = await prismaClient.user.findUnique({
+          where:{ id: userId },
+          select:{ id:true, name:true, email:true }
+      })
+      if(!user){
+          return res.status(404).json({ status:false, message:"User not found"});
+      }
+      return res.status(200).json({ status:true, data:user });
+  }catch(err){
+     
+      return res.status(500).json({ status:false, message:"Internal server error"});
+  }
+}
 // this is for the user to create by the button in fe send
 // the  send me the room-name
 export const RoomSpace = async (req: Request, res: Response) => {

@@ -11,8 +11,10 @@ import {
   Camera,
   PanelLeftOpen,
   PanelRightOpen,
+  User2Icon,
 } from "lucide-react";
 import React, { useState } from "react";
+
 import { CircleHalf } from "phosphor-react";
 
 export function MainCanvasPage({ roomId, socket }: { roomId: string; socket: WebSocket }) {
@@ -94,6 +96,7 @@ useEffect(() => {
       width={dimensions.width}
       height={dimensions.height}className="bg-black cursor-crosshair" />
 
+        
       <div className="absolute top-2 w-full flex items-center justify-center px-2">
         <button
           className="absolute left-3  top-14 bg-zinc-800 text-neutral-400   shadow rounded-md p-[2px] border border-zinc-800   cursor-pointer "
@@ -208,7 +211,7 @@ useEffect(() => {
         </div>
       </div>
 
-      {zoom !== 1 && (
+      {zoom !== 1 && (    
         <div className="absolute bottom-4  right-1 bg-zinc-900 bg-opacity-90 text-white px-3 py-2 rounded-lg text-sm">
           Zoom: {Math.round(zoom * 100)}%
         </div>
@@ -216,3 +219,5 @@ useEffect(() => {
     </div>
   );
 }
+
+

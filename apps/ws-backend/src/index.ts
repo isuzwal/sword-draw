@@ -5,7 +5,7 @@ import { prismaClient } from "@repo/db/clinet";
 
 interface User {
   ws: WebSocket;
-  rooms: string[];
+  rooms: number[];
   userId: string;
 }
 
@@ -68,26 +68,39 @@ wss.on("connection", function connection(ws, request) {
   ws.on("message", async function message(data) {
     try {
       const parsedData = JSON.parse(data.toString());
-     
-      
+      const roomIdNum = parsedData.roomId !== undefined ? Number(parsedData.roomId) : undefined;
     if (parsedData.type === "join_room") {
-  const user = users.find((u) => u.ws === ws);
-  if (user && !user.rooms.includes(parsedData.roomId)) {
-    user.rooms.push(parsedData.roomId);
-
+      // collection of the users at one room
+      await prismaClient.roomMember.upsert({
+      where: {
+        userId_roomId: {
+          userId: userId,
+          roomId: Number(parsedData.roomId)
+        }
+      },
+      update: {},
+      create: {
+        userId: userId,
+        roomId: Number(parsedData.roomId)
+      }
+    })
+  
+    const user = users.find((u) => u.ws === ws);
+    if (user && roomIdNum !== undefined && !user.rooms.includes(roomIdNum)) {
+    user.rooms.push(roomIdNum);
+    
   }
-
   // Fetch all existing shapes for this room from DB
   try {
     const existingShapes = await prismaClient.chat.findMany({
-      where: { roomId: Number(parsedData.roomId) },
+      where: { roomId: Number(parsedData.roomId) ,
+      },
       orderBy: { id: "asc" }, // oldest first
     });
 
- 
     ws.send(JSON.stringify({
       type: "room_history",
-      roomId: parsedData.roomId,
+      roomId: roomIdNum,
       content: existingShapes.map(shape => shape.content)
     }));
     
@@ -97,21 +110,17 @@ wss.on("connection", function connection(ws, request) {
 }
       else if (parsedData.type === "leave_room") {
         const user = users.find((u) => u.ws === ws);
-        if (user) {
-          user.rooms = user.rooms.filter(room => room !== parsedData.roomId);
-        
+        if (user && roomIdNum !== undefined) {
+          user.rooms = user.rooms.filter(room => room !== roomIdNum);
         }
-      }
-      
+      }     
       else if (parsedData.type === "chat") {
         const { roomId, message } = parsedData;
-
         const content = message?.content;
-        
+
         if (!roomId || !content) {
           return;
         }
-
         // Save to database ONCE
         try {
           await prismaClient.chat.create({
@@ -126,19 +135,17 @@ wss.on("connection", function connection(ws, request) {
           console.error("Database error:", dbError);
           return;
         }
-
- 
         const usersInRoom = users.filter(user => 
-          user.rooms.includes(roomId) && user.ws !== ws
+          user.rooms.includes(Number(roomId)) && user.ws !== ws
         );
-
+        // for BoradCast to everyone 
         usersInRoom.forEach(user => {
           if (user.ws.readyState === WebSocket.OPEN) {
             user.ws.send(JSON.stringify({
               type: "chat",
               content,
               roomId,
-              userId 
+              userId,
             }));
           }
         });

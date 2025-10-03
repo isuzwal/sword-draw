@@ -131,7 +131,6 @@ Built with Next.js 15, featuring:
 - **Authentication Pages** - Login and signup forms
 - **Canvas View** - Main drawing interface
 - **Room Management** - Create and join drawing rooms
-- **Chat Interface** - Real-time messaging
 - **Navigation** - Responsive navbar with user controls
 
 ## 🔧 Backend Services

@@ -290,7 +290,7 @@ export async function FetchingAllShape(roomId: string): Promise<Shape[]> {
 
         const data = res?.data?.data?.chat ?? [];
         const content = data.map((d: any) => d.content).filter(isValidShape);
-        console.log("Form the backend ", content)
+       
         return content;
     } catch(err) {
         console.log("Error fetching shapes:", err);
@@ -309,10 +309,11 @@ export async function JoinRoomCanavas(roomId: string): Promise<Shape[]> {
 
         const data = res?.data?.data?.chat ?? [];
         const content = data.map((d: any) => d.content).filter(isValidShape);
-        console.log("Form the backend ", content)
+        
         return content;
     } catch(err) {
         console.log("Error fetching shapes:", err);
         return [];
     }
 }
+// fetching the users collection here

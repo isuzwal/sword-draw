@@ -177,11 +177,23 @@ export const RoomChat = async (req: Request, res: Response) => {
       },
   
     });
+    const usercollection=await prismaClient.roomMember.findMany({
+      where:{
+        roomId:Number(roomId)
+      },include:{
+        user:{
+          select:{
+            name:true
+          }
+        }
+      }
+    })
     if (chat.length > 0) {
       return res.status(200).json({
         status: true,
-        data: { chat },
+        data: { chat ,usercollection},
       });
+      console.log()
     } else {
       return res.status(200).json({
         status: true,
@@ -201,7 +213,6 @@ export const RoomChat = async (req: Request, res: Response) => {
 export const UserRoom=async (req: Request, res: Response)=>{
    // @ts-ignore
  const userId=req.userId;
- console.log(userId)
  try{
   if(!userId){
  return res.status(400).json({
@@ -214,11 +225,10 @@ export const UserRoom=async (req: Request, res: Response)=>{
       adminId:userId
     }
   })
-  console.log('Room -->',rooms)
   return res.status(200).json({
     status:true,
    data:rooms,
-   message:"Get the  Rooms  Infroma " 
+   message:"Get the  Rooms  Infromation successfully " 
   })
 }catch(err){
   console.log(" Erorr -->", err);

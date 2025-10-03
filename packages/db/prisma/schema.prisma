@@ -17,6 +17,7 @@ model User {
   photo String?
   romms Room[] // one user can have multiple room 
   chats Chat[] // one can have  chat app
+  joinrooms RoomMember[] // user join rooms
 }
 model Room{
   id Int @id @default(autoincrement())
@@ -24,7 +25,8 @@ model Room{
   createAt DateTime @default (now()) 
   adminId String//  who create the Room
   admin  User  @relation(fields: [adminId],references: [id]) 
- chats  Chat[]
+  chats  Chat[] // one room can have multiple chats
+  member RoomMember[] // 
 }
  model Chat{
   id   Int  @id @default(autoincrement())
@@ -33,4 +35,12 @@ model Room{
   userId String
   room Room @relation(fields: [roomId],references: [id])
   user User @relation(fields: [userId],references: [id])
+ }
+ model RoomMember{
+  id Int @id @default(autoincrement())
+  userId String 
+  roomId Int // join roomId 
+  user User @relation(fields:[userId],references:[id])
+  room Room @relation(fields:[roomId],references:[id]) // which rooms join
+  @@unique([userId, roomId])
  }

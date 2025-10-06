@@ -21,41 +21,36 @@ export function Navbarpage() {
       localStorage.removeItem("token")
      router.push('/login')
     } catch(error:any){
-      toast.error('Something went wrong try  again !')
+      toast.error('Pleas try  agian !')
     }
   }
   return (
-    <div className=" rounded-xl mt-2   border border-neutral-200 ">
-      <div className="w-full flex items-center justify-between px-3 py-2">
+    <div className="rounded-xl bg-white/70 dark:bg-zinc-900/60 backdrop-blur supports-[backdrop-filter]:bg-white/40 shadow-sm">
+      <div className="w-full flex items-center justify-between px-2 py-2">
         <Link
           href="/"
-          className="flex  gap-1 px-3 py-2 transition duration-300  cursor-pointer items-center rounded-md text-neutral-700  hover:text-neutral-400 "
+          className="flex gap-2 px-3 py-2 transition duration-300 cursor-pointer items-center rounded-lg text-neutral-700 hover:text-neutral-500 dark:text-neutral-200 dark:hover:text-neutral-300"
         >
           <Swords size="20" className="text-purple-500" />
-          <h1 className="text-base font-semibold">PrismArt</h1>
+          <h1 className="text-base font-semibold tracking-tight">PrismArt</h1>
         </Link>
 
         <RoomForm show={show} onShow={() => setShow(false)} />
 
-        <div className="hidden     mr-10  sm:flex items-center gap-3">
+        <div className="hidden mr-3 sm:flex items-center gap-3">
           {token ? (
             <div className="flex items-center justify-center gap-2">
               <Button onClick={() => setShow(true)} className="w-full cursor-pointer">
                 Create space
               </Button>
-               <div className="border w-full border-slate-100  rounded-md">
-                <Button onClick={handleLogout}  variant={'destructive'} className="w-full cursor-pointer">
-                  Logout
-                </Button>
-              </div>
+              <Button onClick={handleLogout} variant={'destructive'} className="w-full cursor-pointer">
+                Logout
+              </Button>
             </div>
           ) : (
-            <Link
-              href={"/login"}
-              className="inline-block cursor-pointer items-center justify-center rounded-md border-[1.58px] border-zinc-600 bg-zinc-950 px-2 py-1 font-medium text-slate-200 shadow-md"
-            >
-              Login
-            </Link>
+           <Button className="cursor-pointer w-full">
+            <Link  href={"/login"}>Login</Link>
+           </Button>
           )}
         </div>
 
@@ -67,25 +62,20 @@ export function Navbarpage() {
       </div>
 
       {expanded && (
-        <div className="sm:hidden flex flex-col items-start gap-2 px-3 py-2 border-t">
+        <div className="sm:hidden flex flex-col items-start gap-2 px-3 py-3">
           {token ? (
             <>
               <Button onClick={() => setShow(true)} className="w-full">
                 Create space
               </Button>
-              <div className="border w-full border-slate-100  rounded-md">
-                <Button  onClick={handleLogout}  variant={'destructive'} className="w-full cursor-pointer">
-                  Logout
-                </Button>
-              </div>
+              <Button onClick={handleLogout} variant={'destructive'} className="w-full cursor-pointer">
+                Logout
+              </Button>
             </>
           ) : (
-            <Link
-              href={"/login"}
-              className="w-full inline-block cursor-pointer items-center justify-center rounded-md border-[1.58px] border-zinc-600 bg-zinc-950 px-3 py-2 font-medium text-slate-200 shadow-md text-center"
-            >
-              Login
-            </Link>
+            <Button className="cursor-pointer w-full">
+            <Link  href={"/login"}>Login</Link>
+           </Button>
           )}
         </div>
       )}

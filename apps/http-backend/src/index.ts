@@ -11,7 +11,7 @@ app.use(cors());
     res.send("Hello world")
  })
  app.use("/api/v1/sword-draw/user",router)
-// Servering at 3000
+// Servering at 8000
 app.listen(PORT,()=>{
     console.log("http server running on "+PORT
     )});

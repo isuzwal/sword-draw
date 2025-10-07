@@ -1,5 +1,5 @@
 "use client";
-import { LoaderCircle, X ,RefreshCcw, RotateCw} from "lucide-react";
+import { LoaderCircle, X , RotateCw} from "lucide-react";
 import { Label } from "../ui/label";
 import { Input } from "../ui/input";
 import { useState, useEffect } from "react";
@@ -7,11 +7,11 @@ import { Button } from "../ui/button";
 import axios from "axios";
 import { HTTP_BACKNED } from "@/app/config";
 import { toast } from "sonner";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "../ui/tabs";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "../ui/tabs"
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { Loadingroom } from "./loading";
-import { FetchingAllShape, JoinRoomCanavas } from "@/app/draw";
+
+import {  JoinRoomCanavas } from "@/app/draw";
 interface Room {
   show: boolean;
   onShow: () => void;
@@ -21,7 +21,7 @@ export function RoomForm({ show, onShow }: Room) {
   const router=useRouter();
   const [token, setToken] = useState<string | null>(null);
   const [loading, setLoading] = useState<boolean>(false);
-  const [rooms, setRooms] = useState<any[]>([]);
+  const [rooms, setRooms] = useState<Array<{ id: string; slug: string }>>([]);
   const [name, setRoom] = useState<string>("");
   const [roomId,setRoomId]=useState("")
  
@@ -56,8 +56,10 @@ export function RoomForm({ show, onShow }: Room) {
       }
       setRoom("");
       
-    } catch (err: any) {
+    } catch (err) {
+      // @ts-ignore
       if (err.response) {
+        // @ts-ignore
         toast.error(err.response.data.error || "Something went wrong");
       } else {
         toast.error("Networking error");
@@ -80,7 +82,7 @@ export function RoomForm({ show, onShow }: Room) {
       setRooms(res.data.data || []); 
    
       toast.success("Rooms loaded");
-    } catch (err: any) {
+    } catch (err) {
       toast.error("Could not load rooms");
     }finally{
       setLoading(false)
@@ -92,10 +94,13 @@ export function RoomForm({ show, onShow }: Room) {
    try{
     await  JoinRoomCanavas(roomId)
      router.push(`/canvas/${roomId}`)
-   }catch (err: any) {
+    }catch (err) {
+      // @ts-ignore
       if (err.response) {
+        // @ts-ignore
         toast.error(err.response.data.error || "Something went wrong");
       } else {
+        // @ts-ignore
         toast.error(err?.response?.data?.message || "Failed to join room");
       }
     } finally{

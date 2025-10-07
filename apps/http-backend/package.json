@@ -32,4 +32,14 @@
   "author": "",
   "license": "ISC",
   "type": "commonjs"
+  ,
+  "turbo": {
+    "pipeline": {
+      "build": {
+        "outputs": [
+         
+        ]
+      }
+    }
+  }
 }

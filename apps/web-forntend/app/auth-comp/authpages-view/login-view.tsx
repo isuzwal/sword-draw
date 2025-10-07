@@ -53,7 +53,7 @@ export function LoginPage() {
         router.push("/");
       }
     } catch (err: any) {
-      console.log(err)
+   
       if (err.response) {
         toast.error(err.response.data.message);
       } else {

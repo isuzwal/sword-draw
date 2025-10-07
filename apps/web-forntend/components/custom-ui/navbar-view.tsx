@@ -20,7 +20,7 @@ export function Navbarpage() {
     try{
       localStorage.removeItem("token")
      router.push('/login')
-    } catch(error:any){
+    } catch{
       toast.error('Pleas try  agian !')
     }
   }

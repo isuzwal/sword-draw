@@ -3,16 +3,13 @@ import {  Github, Twitter } from "lucide-react";
 
 export default function FooterPage() {
   return (
-    <footer className="bg-white text-gray-600 border-t border-gray-200">
+    <footer className="text-neutral-500">
+      <div className="h-px bg-neutral-600  opacity-40" />
       <div className="max-w-screen-lg mx-auto px-4 py-6 flex flex-col sm:flex-row items-center justify-between">
-     
         <div className="text-sm font-medium">
           &copy; {new Date().getFullYear()} uzwal. All rights reserved.
         </div>
-
-       
-        <div className="mt-4 sm:mt-0 flex space-x-2 bg-slate-100 border-neutral-100 hover:bg-slate-100/60 cursor-pointer transition duration-300  text-shadow border px-3 py-1.5 rounded-md">
-          
+        <div className="mt-4 sm:mt-0 flex space-x-2 dark:bg-zinc-900 dark:border-neutral-950 bg-slate-100 border-neutral-100  cursor-pointer transition duration-300  text-shadow border px-3 py-1.5 rounded-md">  
           <a
             href="https://twitter.com/isuzwal"
             aria-label="Twitter"

@@ -6,6 +6,6 @@ interface Props{
 }
 export default function Conatiner({children }:Props) {
   return (
-    <div className='min-h-screen p-2  max-w-7xl mx-auto w-full'>{children}</div>
+    <div className='min-h-screen p-2  bg-neutral-50 dark:bg-neutral-950  max-w-7xl mx-auto w-full'>{children}</div>
   )
 }

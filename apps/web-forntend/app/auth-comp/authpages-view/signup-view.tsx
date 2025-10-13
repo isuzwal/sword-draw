@@ -29,6 +29,10 @@ const SigupFormSchema = z.object({
   password: z.string().min(6, { message: "Password must be at least 6 characters" }),
 });
 
+
+interface ErrorResponse {
+  erorr:string
+}
 export function SignupPage() {
   const [loading, setLoading] = useState(false);
   const router = useRouter();
@@ -54,11 +58,11 @@ export function SignupPage() {
         toast.success(res.data.message || "Account create successfully");
         router.push("/login");
       }
-    } catch (err: any) {
-      if (err.response) {
-        toast.error(err.response.data.error || "Something went  wrong ");
+    } catch (err) {
+      if (axios.isAxiosError<ErrorResponse>(err)) {
+        toast.error(err.response?.data?.erorr || "Something went  wrong ");
       } else {
-        toast.error("Networking error");
+        toast.error("Please try   again !");
       }
     } finally {
       setLoading(false);
@@ -74,15 +78,10 @@ export function SignupPage() {
         </Link>
 
         <div>
-          <div className="p-6 rounded-2xl border border-neutral-200 shadow">
+          <div className="p-6 rounded-2xl">
             <Form {...form}>
               <form onSubmit={form.handleSubmit(handleLogin)} className="space-y-4">
-                <div className="text-center flex  flex-col items-center">
-                  <h1 className="text-2xl font-bold">Create your account</h1>
-                  <p className="text-gray-600 text-sm ">
-                    Quick, simple, and secure —your space to start building.
-                  </p>
-                </div>
+                
                 <FormField
                   control={form.control}
                   name="username"
@@ -90,7 +89,7 @@ export function SignupPage() {
                     <FormItem>
                       <FormLabel className="font-medium text-md p-1">Username</FormLabel>
                       <FormControl>
-                        <Input type="text" placeholder="Jon" {...field} />
+                        <Input type="text" placeholder="uzwal" {...field} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -103,7 +102,7 @@ export function SignupPage() {
                     <FormItem>
                       <FormLabel className="font-medium text-md p-1">Email</FormLabel>
                       <FormControl>
-                        <Input type="email" placeholder="you@example.com" {...field} />
+                        <Input type="email" placeholder="uzwal@gmail.com" {...field} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -140,9 +139,9 @@ export function SignupPage() {
               </form>
             </Form>
 
-            <p className="mt-6 text-center text-sm">
+            <p className="mt-6 text-neutral-500 font-semibold text-center text-sm">
               Already have an account?{" "}
-              <Link href="/login" className="font-semibold underline underline-offset-4">
+              <Link href="/login" className="font-semibold dark:text-neutral-300 text-neutral-900 underline underline-offset-4">
                 Login
               </Link>
             </p>

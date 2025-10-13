@@ -23,6 +23,11 @@ import { HTTP_BACKNED } from "@/app/config";
 import axios from "axios";
 import { useRouter } from "next/navigation";
 
+
+interface ErrorResponse {
+  error:string
+}
+
 const LoginFormSchema = z.object({
   email: z.string().email({ message: "Enter a valid email address" }),
   password: z.string().min(6, { message: "Password must be at least 6 characters" }),
@@ -52,10 +57,9 @@ export function LoginPage() {
         toast.success(res.data.message || "Login successfully");
         router.push("/");
       }
-    } catch (err: any) {
-   
-      if (err.response) {
-        toast.error(err.response.data.message);
+    } catch (err) {
+      if (axios.isAxiosError<ErrorResponse>(err)) {
+        toast.error(err.response?.data?.error);
       } else {
         toast.warning("Networking error");
       }
@@ -73,7 +77,7 @@ export function LoginPage() {
         </Link>
 
         <div>
-          <div className="p-6 rounded-2xl border border-neutral-200 shadow">
+          <div className="p-6 rounded-2xl ">
             <Form {...form}>
               <form onSubmit={form.handleSubmit(handleLogin)} className="space-y-6">
                 <div className="text-center">
@@ -89,9 +93,9 @@ export function LoginPage() {
                       <FormControl>
                         <Input
                           type="email"
-                          placeholder="you@example.com"
+                          placeholder="uzwal@gamil.com"
                           {...field}
-                          className="p-1.5 placeholder:text-neutral-500"
+                          className="px-2 placeholder:text-neutral-500"
                         />
                       </FormControl>
                       <FormMessage className="text-red-600" />
@@ -121,7 +125,7 @@ export function LoginPage() {
                 <Button
                   type="submit"
                   disabled={loading}
-                  className=" w-full  rounded-md cursor-pointer text-sm text-white ">
+                  className=" w-full  rounded-md cursor-pointer text-sm  text-neutral-600 dark:text-neutral-800 ">
                   {loading ? (
                     <div className="flex w-full justify-center items-center gap-2 ">
                       <span>Creating your space</span>{" "}
@@ -134,9 +138,9 @@ export function LoginPage() {
               </form>
             </Form>
 
-            <p className="mt-6 text-center text-sm">
+            <p className="mt-6 text-center  text-neutral-500 font-semibold text-sm">
               Didn’t have an account?{" "}
-              <Link href="/signup" className="font-semibold underline underline-offset-4">
+              <Link href="/signup" className="font-semibold dark:text-neutral-400 text-neutral-900 underline underline-offset-4">
                 Sign up
               </Link>
             </p>

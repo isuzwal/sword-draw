@@ -1,4 +1,4 @@
-import { json, Request, Response } from "express";
+import {  Request, Response } from "express";
 import jwt from "jsonwebtoken";
 import { JWT_SCERT } from "@repo/backend-common/config";
 import { SignupScheam, LoginScheam, CreateRoomSchema } from "@repo/common/types";
@@ -127,7 +127,6 @@ export const AccountInfo=async (req:Request, res:Response) => {
 // the  send me the room-name
 export const RoomSpace = async (req: Request, res: Response) => {
   const prased = CreateRoomSchema.safeParse(req.body);
-  console.log(prased)
   try {
     if (!prased.success) {
       return res.status(400).json({
@@ -135,8 +134,13 @@ export const RoomSpace = async (req: Request, res: Response) => {
         status: false,
       });
     }
-    // @ts-ignore
-    const userId = req.userId;
+   
+    const userId = req.userId; 
+
+     if(userId === undefined) {
+      return ;
+     }
+
     const room = await prismaClient.room.create({
       data: {
         slug: prased.data.name,
@@ -150,14 +154,14 @@ export const RoomSpace = async (req: Request, res: Response) => {
       room: room.id,
     });
   } catch (error) {
-    console.log(" Erorr -->", error);
+  
     return res.status(500).json({
       status: false,
       message: " Internal server problem !",
     });
   }
 };
-// no-idea whatv it do ?
+// no-idea what i have  do  here?
 export const RoomSlug = async (req: Request, res: Response) => {
   const slug = req.body.slug;
   console.log(slug);
@@ -178,7 +182,7 @@ export const RoomSlug = async (req: Request, res: Response) => {
       room,
     });
   } catch (error) {
-    console.log(" Erorr -->", error);
+   
     return res.status(500).json({
       status: false,
       message: " Internal server problem !",
@@ -216,7 +220,7 @@ export const RoomChat = async (req: Request, res: Response) => {
         status: true,
         data: { chat ,usercollection},
       });
-      console.log()
+     
     } else {
       return res.status(200).json({
         status: true,
@@ -225,7 +229,7 @@ export const RoomChat = async (req: Request, res: Response) => {
       });
     }
   } catch (error) {
-    console.log(" Erorr -->", error);
+ 
     return res.status(500).json({
       status: false,
       message: " Internal server problem !",

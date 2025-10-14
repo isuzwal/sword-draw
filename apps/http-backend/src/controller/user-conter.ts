@@ -1,17 +1,17 @@
 
 import { Router } from "express"
-import { middlware } from "../middleware";
-import { Singup,Login,RoomSpace ,RoomChat,RoomSlug, UserRoom, AccountInfo} from "../router/router";
+import { middleware } from "../middleware.js";
+import { Singup,Login,RoomChat,UserRoom,AccountInfo,RoomSpace } from "../router/router.js";
 
 const router: ReturnType<typeof Router> = Router();
 router.post("/signup",Singup);
 router.post("/login",Login);
 // this for the3 create the room by providing the room-name 
-router.post("/create-room",middlware,RoomSpace);
+router.post("/create-room",middleware,RoomSpace);
 // after the room is make get the roomId thne join
-router.get("/chat/:roomId",middlware,RoomChat)
-router.get("/rooms",middlware,UserRoom)
-router.get("/me",middlware,AccountInfo)
+router.get("/chat/:roomId",middleware,RoomChat)
+router.get("/rooms",middleware,UserRoom)
+router.get("/me",middleware,AccountInfo)
 // router.get("/room/:slug",middlware,RoomSlug)
 
 // current user info

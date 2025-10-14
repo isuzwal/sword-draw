@@ -1,27 +1,37 @@
-import {Request,Response, NextFunction } from "express";
-import jwt from "jsonwebtoken";
-import { JWT_SCERT } from '@repo/backend-common/config'
+import { Request, Response, NextFunction } from "express";
+import jwt, { decode, JwtPayload } from "jsonwebtoken";
 
-// declare module "express-serve-static-core" {
-// interface Request {
-// userId?: string;
-// }
-// }
-export function middlware(req:Request,res:Response,next:NextFunction){
-    const token=req.headers.authorization?.split(" ")[1];
+const JWT_SECRET = process.env.JWT_SECRET!;  
+
+declare module "express-serve-static-core" {
+  interface Request {
+    userId?: string;
+  }
+}
+
+export function middleware(req: Request, res: Response, next: NextFunction) {
+  const authHeader = req.headers.authorization;
+  const token = authHeader?.split(" ")[1];
   
-   if (!token) return res.status(401).json({ error: "No token provided" });
-    if( !JWT_SCERT){
-        return ;
-    }
-    const decode=jwt.verify(token,JWT_SCERT) ;
-    if(decode){
-        // @ts-ignore
-        req.userId=decode.userId;
-       next()
-    }else{
-        res.status(403).json({
-            message:"Unauthorized"
-        })
-    }
+   if (!token) {
+     throw new Error();
+   }
+  try {
+      const decoded = jwt.verify(token, JWT_SECRET ) as JwtPayload ;
+      if (typeof decoded === "string") {
+        return res.status(403).json({message:"Invalid token !"})
+      }
+      if(!( "userId" in decoded)){
+        return  res.status(403).json({ message: "Invalid token structure" });
+      }
+      if (typeof decoded.userId !== "string") {
+        return res.status(403).json({ message: "Invalid userId type" });
+        }
+        req.userId=decoded.userId
+        next();
+       throw new Error()
+
+  } catch (err) {
+    return res.status(403).json({ message: "Unauthorized" });
+  }
 }

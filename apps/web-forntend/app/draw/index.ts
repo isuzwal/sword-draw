@@ -115,7 +115,6 @@ export async function DrawInit(
 
       exitingShape.push(shape);
       clearCanvas(exitingShape, canvas, ctx, zoomRef.current);
-
       socket.send(
         JSON.stringify({
           roomId,
@@ -176,7 +175,6 @@ export async function DrawInit(
           const cp1y = startY - 50;
           const cp2x = (startX + currentX) / 2;
           const cp2y = currentY + 50;
-
           ctx.bezierCurveTo(cp1x, cp1y, cp2x, cp2y, currentX, currentY);
           ctx.stroke();
         } else if (currentActiveShape === "half-circle") {
@@ -185,14 +183,12 @@ export async function DrawInit(
           const centerX = startX + width / 2;
           const centerY = startY + height / 2;
           const direction: "bottom" = "bottom";
-
           ctx.beginPath();
           if (direction === "bottom") ctx.arc(centerX, centerY, radius, 0, Math.PI);
           else if (direction === "left") ctx.arc(centerX, centerY, radius, 0.5 * Math.PI, 1.5 * Math.PI);
           else if (direction === "right") ctx.arc(centerX, centerY, radius, 1.5 * Math.PI, 0.5 * Math.PI);
           ctx.stroke();
         }
-        
         ctx.restore();
         ctx.setLineDash([]);
       }
@@ -208,7 +204,6 @@ function clearCanvas(exitingShape: Shape[], canvas: HTMLCanvasElement, ctx: Canv
   ctx.save();
   ctx.scale(scale, scale);
   ctx.lineWidth = 2;
-
   exitingShape.forEach((shape) => {
     ctx.beginPath();
     ctx.strokeStyle=shape.color || "#000"
@@ -248,10 +243,9 @@ function clearCanvas(exitingShape: Shape[], canvas: HTMLCanvasElement, ctx: Canv
   
   ctx.restore();
 }
-
+// validation of the shapes
 function isValidShape(shape: any): shape is Shape {
   if (!shape || typeof shape !== "object") return false;
-
   switch (shape.type) {
     case "rectangle":
       return typeof shape.x === "number" && typeof shape.y === "number" && typeof shape.width === "number" && typeof shape.height === "number";
@@ -278,7 +272,7 @@ function isValidShape(shape: any): shape is Shape {
       return false;
   }
 }
-
+ // shapes of the roomId
 export async function FetchingAllShape(roomId: string): Promise<Shape[]> {
     const token = localStorage.getItem("token");
     try {
@@ -293,11 +287,10 @@ export async function FetchingAllShape(roomId: string): Promise<Shape[]> {
        
         return content;
     } catch(err) {
-        console.log("Error fetching shapes:", err);
         return [];
     }
 }
-
+ // the room canvas 
 export async function JoinRoomCanavas(roomId: string): Promise<Shape[]> {
     const token = localStorage.getItem("token");
     try {
@@ -306,14 +299,11 @@ export async function JoinRoomCanavas(roomId: string): Promise<Shape[]> {
                 Authorization: `Bearer ${token}`
             }
         });
-
         const data = res?.data?.data?.chat ?? [];
         const content = data.map((d: any) => d.content).filter(isValidShape);
-        
         return content;
     } catch(err) {
-        console.log("Error fetching shapes:", err);
         return [];
     }
 }
-// fetching the users collection here
+

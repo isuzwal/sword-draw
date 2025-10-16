@@ -4,9 +4,14 @@
   "description": "",
   "main": "index.js",
   "exports": {
-    "./clinet": "./src/index.ts"
+    "./clinet": {
+        "import": "./dist/index.js",
+      "require": "./dist/index.js",
+      "default": "./src/index.ts"
+    }
   },
   "scripts": {
+    "build": "tsc -b",
     "generate": "prisma generate",
     "migrate:dev": "prisma migrate dev",
     "studio": "prisma studio"

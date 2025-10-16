@@ -13,5 +13,6 @@ export const  Userdata=async()=>{
      return res.data
 }catch(error){
     console.log("Error at user Infromation",error)
+    return error
 }
 }

@@ -2,11 +2,17 @@
   "name": "@repo/common",
   "version": "1.0.0",
   "description": "",
-  "main": "index.js",
+  "main": "type.js",
   "exports":{
-    "./types":"./src/type.ts"
+    "./types":{
+      "import": "./dist/type.js",
+      "require": "./dist/type.js",
+      "default": "./src/type.ts"
+
+    }
   },
   "scripts": {
+     "build": "tsc -b",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "devDependencies": {

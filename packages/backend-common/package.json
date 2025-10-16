@@ -3,10 +3,15 @@
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
-  "exports":{
-    "./config":"./src/index.ts"
+  "exports": {
+    "./config": {
+      "import": "./dist/index.js",
+      "require": "./dist/index.js",
+      "default": "./src/index.ts"
+    }
   },
   "scripts": {
+    "build": "tsc -b",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "devDependencies": {

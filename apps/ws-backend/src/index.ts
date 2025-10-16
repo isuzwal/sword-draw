@@ -1,7 +1,7 @@
 import WebSocket, { WebSocketServer } from "ws";
 import jwt from "jsonwebtoken";
 import { JWT_SCERT } from "@repo/backend-common/config";
-import { prismaClient } from "@repo/db/clinet";
+import  { prismaClient } from "@repo/db/clinet";
 
 interface User {
   ws: WebSocket;

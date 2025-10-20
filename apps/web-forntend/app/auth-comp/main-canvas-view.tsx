@@ -17,7 +17,7 @@ import { CircleHalf } from "phosphor-react";
 
 export function MainCanvasPage({ roomId, socket }: { roomId: string; socket: WebSocket }) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
-  const [userdata, setData] = useState<any>(null)
+  const [userdata, setData] = useState(null)
   const [zoom, setZoom] = useState(1);
   const [Isopen, SetOpen] = useState<boolean>(true);
   const [color, setColor] = useState("#f9f5f1");
@@ -114,7 +114,8 @@ useEffect(() => {
           {userdata && (
             <div className="flex items-center gap-2 px-3 py-2 text-neutral-300">
               <User2Icon size={16} />
-              <span className="text-sm font-medium">{userdata.name || 'User'}</span>
+            
+            
             </div>
           )}
      </div>

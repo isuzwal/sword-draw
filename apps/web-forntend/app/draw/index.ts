@@ -287,6 +287,7 @@ export async function FetchingAllShape(roomId: string): Promise<Shape[]> {
        
         return content;
     } catch(err) {
+      console.log(err)
         return [];
     }
 }
@@ -303,6 +304,7 @@ export async function JoinRoomCanavas(roomId: string): Promise<Shape[]> {
         const content = data.map((d: any) => d.content).filter(isValidShape);
         return content;
     } catch(err) {
+      console.log(err)
         return [];
     }
 }

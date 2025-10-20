@@ -1,8 +1,3 @@
-import Link from "next/link"
-import { Button } from "../ui/button"
-import { CanvasMock } from "./canvas-mock"
-import { Github, Sparkles, Palette, Users } from "lucide-react"
-import { Card, CardContent, CardHeader, CardTitle } from "../ui/card"
 
 export const ContentPage=()=>{
     return(

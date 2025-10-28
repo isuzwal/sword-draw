@@ -20,7 +20,7 @@ export async function DrawInit(
 ) {
   try {
     const ctx = canvas.getContext("2d");
-    let exitingShape: Shape[] = await FetchingAllShape(roomId);
+    const exitingShape: Shape[] = await FetchingAllShape(roomId);
 
     if (!ctx) {
       return;
@@ -182,7 +182,7 @@ export async function DrawInit(
              ctx.strokeStyle=color.current
           const centerX = startX + width / 2;
           const centerY = startY + height / 2;
-          const direction: "bottom" = "bottom";
+         const direction = "bottom" as const;
           ctx.beginPath();
           if (direction === "bottom") ctx.arc(centerX, centerY, radius, 0, Math.PI);
           else if (direction === "left") ctx.arc(centerX, centerY, radius, 0.5 * Math.PI, 1.5 * Math.PI);
@@ -243,31 +243,37 @@ function clearCanvas(exitingShape: Shape[], canvas: HTMLCanvasElement, ctx: Canv
   
   ctx.restore();
 }
-// validation of the shapes
-function isValidShape(shape: any): shape is Shape {
+// validation of the shapes 
+ // check the paramter and return type of it 
+function isValidShape(shape:unknown): shape is Shape {
+
   if (!shape || typeof shape !== "object") return false;
-  switch (shape.type) {
+   // eslint-disable-next-line @typescript-eslint/no-explicit-any
+   const S = shape as any;
+  switch (S.type) {
     case "rectangle":
-      return typeof shape.x === "number" && typeof shape.y === "number" && typeof shape.width === "number" && typeof shape.height === "number";
+      return typeof S.x === "number" && typeof S.y === "number" && typeof S.width === "number" && typeof S.height === "number" && typeof S.color === "string";
     case "circle":
-      return typeof shape.centerX === "number" && typeof shape.centerY === "number" && typeof shape.radius === "number";
+      return typeof S.centerX === "number" && typeof S.centerY === "number" && typeof S.radius === "number" && typeof S.color === "string" ;
     case "line":
-      return typeof shape.x1 === "number" && typeof shape.y1 === "number" && typeof shape.x2 === "number" && typeof shape.y2 === "number";
+      return typeof S.x1 === "number" && typeof S.y1 === "number" && typeof S.x2 === "number" && typeof S.y2 === "number" && typeof S.color === "string" ;
     case "ellipse":
-      return typeof shape.centerX === "number" && typeof shape.centerY === "number" && typeof shape.radiusX === "number" && typeof shape.radiusY === "number";
+      return typeof S.centerX === "number" && typeof S.centerY === "number" && typeof S.radiusX === "number" && typeof S.radiusY === "number" && typeof S.color === "string"
+      ;
     case "curve":
       return (
-        typeof shape.startX === "number" &&
-        typeof shape.startY === "number" &&
-        typeof shape.cp1x === "number" &&
-        typeof shape.cp1y === "number" &&
-        typeof shape.cp2x === "number" &&
-        typeof shape.cp2y === "number" &&
-        typeof shape.endX === "number" &&
-        typeof shape.endY === "number"
+        typeof S.startX === "number" &&
+        typeof S.startY === "number" &&
+        typeof S.cp1x === "number" &&
+        typeof S.cp1y === "number" &&
+        typeof S.cp2x === "number" &&
+        typeof S.cp2y === "number" &&
+        typeof S.endX === "number"&&
+        typeof S.color === "string" &&
+        typeof S.endY === "number"
       );
     case "half-circle":
-      return typeof shape.centerX === "number" && typeof shape.centerY === "number" && typeof shape.radius === "number";
+      return typeof S.centerX === "number" && typeof S.centerY === "number" && typeof S.radius === "number" && typeof S.color === "string" ;
     default:
       return false;
   }
@@ -278,16 +284,14 @@ export async function FetchingAllShape(roomId: string): Promise<Shape[]> {
     try {
         const res = await axios.get(`${HTTP_BACKNED}/chat/${roomId}`, {
             headers: {
-                Authorization: `Bearer ${token}`
+              Authorization: `Bearer ${token}`
             }
         });
-
         const data = res?.data?.data?.chat ?? [];
-        const content = data.map((d: any) => d.content).filter(isValidShape);
-       
+        const content = data.map((d: unknown) => (d as Record<string, unknown>).content).filter(isValidShape);
         return content;
     } catch(err) {
-      console.log(err)
+      console.log("Error at the darwing part -->",err)
         return [];
     }
 }
@@ -297,14 +301,14 @@ export async function JoinRoomCanavas(roomId: string): Promise<Shape[]> {
     try {
         const res = await axios.get(`${HTTP_BACKNED}/chat/${roomId}`, {
             headers: {
-                Authorization: `Bearer ${token}`
+            Authorization: `Bearer ${token}`
             }
         });
         const data = res?.data?.data?.chat ?? [];
-        const content = data.map((d: any) => d.content).filter(isValidShape);
+    const content = data.map((d: unknown) => (d as Record<string, unknown>).content).filter(isValidShape);
         return content;
     } catch(err) {
-      console.log(err)
+      console.log("Error  while fetching data -->",err)
         return [];
     }
 }

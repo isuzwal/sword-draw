@@ -61,7 +61,7 @@ export function RoomForm({ show, onShow }: Room) {
       if (axios.isAxiosError<ErrorResponse>(err)) {
         toast.error(err.response?.data?.erorr);
       } else {
-        toast.warning("Networking error");
+        toast.warning("Please try again ");
       }
     } finally {
       setLoading(false);
@@ -82,7 +82,11 @@ export function RoomForm({ show, onShow }: Room) {
 
       toast.success("Rooms loaded");
     } catch (err) {
-      toast.error("Could not load rooms");
+      if (axios.isAxiosError<ErrorResponse>(err)) {
+        toast.error(err.response?.data?.erorr);
+      } else {
+        toast.warning(" Soory Cloud not load the room ");
+      }
     } finally {
       setLoading(false);
     }
@@ -219,7 +223,7 @@ const GetRoom = ({ loading, rooms, handleId }: GetRoomProps) => {
           </div>
         ) : (
           <p className="text-[12px]  font-medium  dark:text-neutral-400 text-neutral-500 p-2">
-            Reload the page if did't show the your rooms after create room .
+            Reload the page if did&apos;t show the your rooms after create room .
           </p>
         )}
       </div>

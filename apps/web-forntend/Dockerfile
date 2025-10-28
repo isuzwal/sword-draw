@@ -2,7 +2,7 @@ FROM  node:20-alpine
 
 RUN npm install -g pnpm
 
-WORKDIR  /app/
+WORKDIR  /app
 
 COPY  package.json pnpm-lock.yaml pnpm-workspace.yaml ./
 COPY packages ./packages
@@ -19,4 +19,4 @@ RUN pnpm --filter @repo/common build
 RUN pnpm --filter web-forntend build
 EXPOSE 3000
 
-CMD ["pnpm", "start"]
+CMD ["pnpm", "--filter", "web-forntend", "start"]

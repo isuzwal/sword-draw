@@ -1,7 +1,7 @@
 import { Request, Response, NextFunction } from "express";
-import jwt, { decode, JwtPayload } from "jsonwebtoken";
-
-const JWT_SECRET = process.env.JWT_SECRET!;  
+import jwt, {  JwtPayload } from "jsonwebtoken";
+import { JWT_SECERT } from "@repo/backend-common/config";
+ 
 
 declare module "express-serve-static-core" {
   interface Request {
@@ -14,10 +14,10 @@ export function middleware(req: Request, res: Response, next: NextFunction) {
   const token = authHeader?.split(" ")[1];
   
    if (!token) {
-     throw new Error();
+    return res.status(403).json({ message: "Unauthorized: No token provided" });
    }
   try {
-      const decoded = jwt.verify(token, JWT_SECRET ) as JwtPayload ;
+      const decoded = jwt.verify(token, JWT_SECERT ) as JwtPayload ;
       if (typeof decoded === "string") {
         return res.status(403).json({message:"Invalid token !"})
       }
@@ -29,7 +29,7 @@ export function middleware(req: Request, res: Response, next: NextFunction) {
         }
         req.userId=decoded.userId
         next();
-       throw new Error()
+      
 
   } catch (err) {
     return res.status(403).json({ message: "Unauthorized" });

@@ -1,8 +1,8 @@
 import {  Request, Response } from "express";
 import jwt from "jsonwebtoken";
-import { JWT_SCERT } from "@repo/backend-common/config";
+import { JWT_SECERT } from "@repo/backend-common/config";
 import { SignupScheam, LoginScheam, CreateRoomSchema } from "@repo/common/types";
-import { prismaClient } from "@repo/db/clinet";
+import { prismaClient } from "@repo/db/client";
 import { hash, compare } from "bcrypt-ts";
 
 export const Singup = async (req: Request, res: Response) => {
@@ -79,14 +79,14 @@ export const Login = async (req: Request, res: Response) => {
     });
      
     }
-    if (!JWT_SCERT) {
+    if (!JWT_SECERT) {
       return;
     }
     const token = jwt.sign(
       {
         userId: is_Existinguser.id,
       },
-      JWT_SCERT
+      JWT_SECERT
     );
     return res.status(200).json({
       status: true,
@@ -127,6 +127,7 @@ export const AccountInfo=async (req:Request, res:Response) => {
 // the  send me the room-name
 export const RoomSpace = async (req: Request, res: Response) => {
   const prased = CreateRoomSchema.safeParse(req.body);
+
   try {
     if (!prased.success) {
       return res.status(400).json({
@@ -137,13 +138,16 @@ export const RoomSpace = async (req: Request, res: Response) => {
    
     const userId = req.userId; 
 
-     if(userId === undefined) {
-      return ;
-     }
+    if(userId === undefined) {
+  return res.status(401).json({
+    status: false,
+    message: "Unauthorized: User ID not found"
+  });
+}
 
     const room = await prismaClient.room.create({
       data: {
-        slug: prased.data.name,
+        slug: prased.data.room_name,
         adminId: userId,
       },
     });
@@ -164,7 +168,7 @@ export const RoomSpace = async (req: Request, res: Response) => {
 // no-idea what i have  do  here?
 export const RoomSlug = async (req: Request, res: Response) => {
   const slug = req.body.slug;
-  console.log(slug);
+
   try {
     if (!slug) {
       return res.status(400).json({

@@ -1,1 +1,1 @@
-export const JWT_SCERT=process.env.JWT_SCERT || "SUFHSFGVSVFIOH21"
+export const JWT_SECERT=process.env.JWT_SECERT || "SUFHSFGVSVFIOH21"

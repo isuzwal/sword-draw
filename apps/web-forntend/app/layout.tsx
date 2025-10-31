@@ -1,11 +1,7 @@
 import type { Metadata } from "next";
 import "@fontsource/inter";
 import "./globals.css";
-import { Toaster } from "sonner";
-import { ThemeProvider } from "next-themes";
-
-
-
+import ThemeLayout from "./themeLayout";
 
 export const metadata: Metadata = {
   title: "PrismArt",
@@ -19,19 +15,10 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-   <body style={{ fontFamily: "Inter, sans-serif" }}>
-        <ThemeProvider attribute={"class"} defaultTheme="system" enableSystem>
+      <body style={{ fontFamily: "Inter, sans-serif" }}>
+        <ThemeLayout>
           {children}
-          <Toaster
-            richColors
-            toastOptions={{
-              classNames: {
-                success: "bg-green-600 text-white border-green-700",
-                error: "bg-red-600 text-red border-red-700",
-              },
-            }}
-          />
-        </ThemeProvider>
+        </ThemeLayout>
       </body>
     </html>
   );

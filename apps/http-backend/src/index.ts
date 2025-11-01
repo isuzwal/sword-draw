@@ -6,7 +6,7 @@ const app=express();
 app.use(express.json())
 const PORT=8000;
 app.use(cors({
-   origin: 'http://localhost:3000',
+   origin: ['http://localhost:3000', 'https://prismart.vercel.app '],
    credentials: true
 }));
 

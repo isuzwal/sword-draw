@@ -5,7 +5,7 @@ import { Input } from "../ui/input";
 import { useState, useEffect } from "react";
 import { Button } from "../ui/button";
 import axios from "axios";
-import { HTTP_BACKNED } from "@/app/config";
+import { HTTP_BACKEND } from "@/app/config";
 import { toast } from "sonner";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "../ui/tabs";
 import { useRouter } from "next/navigation";
@@ -45,7 +45,7 @@ export function RoomForm({ show, onShow }: Room) {
     setLoading(true);
     try {
       const res = await axios.post(
-        `${HTTP_BACKNED}/create-room`,
+        `${HTTP_BACKEND}/create-room`,
         { room_name },
         {
           headers: {
@@ -59,7 +59,7 @@ export function RoomForm({ show, onShow }: Room) {
       setRoom_name("");
     } catch (err) {
       if (axios.isAxiosError<ErrorResponse>(err)) {
-        toast.error(err.response?.data?.erorr);
+         toast.error(err.response?.data?.erorr || "Fail to created room  ");
       } else {
         toast.warning("Please try again ");
       }
@@ -75,7 +75,7 @@ export function RoomForm({ show, onShow }: Room) {
     }
     setLoading(true);
     try {
-      const res = await axios.get(`${HTTP_BACKNED}/rooms`, {
+      const res = await axios.get(`${HTTP_BACKEND}/rooms`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       setRooms(res.data.data || []);
@@ -83,7 +83,7 @@ export function RoomForm({ show, onShow }: Room) {
       toast.success("Rooms loaded");
     } catch (err) {
       if (axios.isAxiosError<ErrorResponse>(err)) {
-        toast.error(err.response?.data?.erorr);
+         toast.error(err.response?.data?.erorr || "Can't laod the rooms ");
       } else {
         toast.warning(" Soory Cloud not load the room ");
       }

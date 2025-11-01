@@ -1,5 +1,5 @@
 import axios from "axios";
-import { HTTP_BACKNED } from "../config";
+import { HTTP_BACKEND } from "../config";
 
 type Shape =
   | { type: "rectangle"; x: number; y: number; width: number; height: number ,color:string }
@@ -282,7 +282,7 @@ function isValidShape(shape:unknown): shape is Shape {
 export async function FetchingAllShape(roomId: string): Promise<Shape[]> {
     const token = localStorage.getItem("token");
     try {
-        const res = await axios.get(`${HTTP_BACKNED}/chat/${roomId}`, {
+        const res = await axios.get(`${HTTP_BACKEND}/chat/${roomId}`, {
             headers: {
               Authorization: `Bearer ${token}`
             }
@@ -299,7 +299,7 @@ export async function FetchingAllShape(roomId: string): Promise<Shape[]> {
 export async function JoinRoomCanavas(roomId: string): Promise<Shape[]> {
     const token = localStorage.getItem("token");
     try {
-        const res = await axios.get(`${HTTP_BACKNED}/chat/${roomId}`, {
+        const res = await axios.get(`${HTTP_BACKEND}/chat/${roomId}`, {
             headers: {
             Authorization: `Bearer ${token}`
             }

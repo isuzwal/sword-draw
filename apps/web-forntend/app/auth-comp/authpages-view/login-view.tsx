@@ -59,7 +59,7 @@ export function LoginPage() {
       }
     } catch (err) {
       if (axios.isAxiosError<ErrorResponse>(err)) {
-        toast.error(err.response?.data?.error);
+        toast.error(err.response?.data?.error || "Fail to login ");
       } else {
         toast.warning("Networking error");
       }

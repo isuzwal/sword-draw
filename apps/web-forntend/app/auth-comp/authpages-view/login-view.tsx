@@ -19,7 +19,7 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 
-import { HTTP_BACKNED } from "@/app/config";
+import { HTTP_BACKEND} from "@/app/config";
 import axios from "axios";
 import { useRouter } from "next/navigation";
 
@@ -47,7 +47,7 @@ export function LoginPage() {
   async function handleLogin(values: z.infer<typeof LoginFormSchema>) {
     setLoading(true);
     try {
-      const res = await axios.post(`${HTTP_BACKNED}/login`, {
+      const res = await axios.post(`${HTTP_BACKEND}/login`, {
         email: values.email,
         password: values.password,
       });

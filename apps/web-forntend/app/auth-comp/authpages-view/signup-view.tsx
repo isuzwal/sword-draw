@@ -21,7 +21,7 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import axios from "axios";
-import { HTTP_BACKNED } from "@/app/config";
+import { HTTP_BACKEND } from "@/app/config";
 
 const SigupFormSchema = z.object({
   username: z.string().min(3, { message: "Username must be at least 3 letter" }),
@@ -49,7 +49,7 @@ export function SignupPage() {
   async function handleLogin(values: z.infer<typeof SigupFormSchema>) {
     setLoading(true);
     try {
-      const res = await axios.post(`${HTTP_BACKNED}/signup`, {
+      const res = await axios.post(`${HTTP_BACKEND}/signup`, {
         username: values.username,
         email: values.email,
         password: values.password,
